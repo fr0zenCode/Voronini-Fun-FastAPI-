@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA_Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+</head>
+
+<body>
+
+    <div class="login-card">
+
+        <h2>Войти</h2>
+        <h3>Введите ваши данные:</h3>
+
+ 
+        <input placeholder="Email" id="email">
+        <input placeholder="Пароль" id="password">
+        <a href="#">Я забыл пароль, что теперь будет??</a>
+        <button onclick="send()">Войти</button>
+
+
+    </div>
+
+<script>
+
+        async function send(){
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+                const response = await fetch("/user/authorize-user", {
+                    method: "POST",
+                    headers: {"Accept": "application/json", "Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                })
+                document.location.href = '/user/id/randomID'
+
+                
+            }
+
+</script>
+
+</body>
+
+</html>

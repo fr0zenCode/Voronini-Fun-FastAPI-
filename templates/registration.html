@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA_Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Registration</title>
+</head>
+
+<body>
+
+    <div class="registration-card">
+        
+        <h2>Регистрация</h2>
+
+        <input type="text" placeholder="Имя" id="first_name">
+        <input type="text" placeholder="Фамилия" id="second_name">
+        <input type="text" placeholder="Ник" id="username">
+        <input type="email" placeholder="email" id="email">
+        <input type="password" placeholder="Пароль" id="password">
+        <input type="password" placeholder="Повторите пароль" id="password_again">
+        
+        <div id="message"></div>
+
+        <button onclick="send()">Зарегистрироваться</button>
+        
+
+    </div>
+
+    <script>
+        async function send(){
+    
+            const password = document.getElementById("password").value;
+            const password_again = document.getElementById("password_again").value;
+
+            if (password == password_again) {
+    
+                const first_name = document.getElementById("first_name").value;
+                const second_name = document.getElementById("second_name").value;
+                const username = document.getElementById("username").value;
+                const email = document.getElementById("email").value;
+    
+                const response = await fetch("/user/registrate-user", {
+                    method: "POST",
+                    headers: {"Accept": "application/json", "Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        first_name: first_name,
+                        second_name: second_name,
+                        username: username,
+                        email: email,
+                        password: password
+                    })
+                })
+
+                if (response.ok) {
+
+                    document.location.href = '/user/login'
+                }
+
+            }
+            else
+                document.getElementById("message").textContent = "Пароли не совпадают"
+        }
+    </script>
+
+
+</body>
+
+</html>
