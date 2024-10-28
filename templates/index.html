@@ -5,12 +5,47 @@
     <title>feed</title>
 </head>
 <body>
-    <form action="/get-post" method="POST">
+
+
+
     Author: <br />
-    <input type="text" name="author" /> <br />
+    <input type="text" name="author" id="author" /> <br />
     Text: <br />
-    <input type="text" name="text" />
-        <button type="submit">Ok</button>
-    </form>
+    <input type="text" name="text" id="text"/>
+
+    <button onclick="send()">Ok</button>
+
+
+    <div id="message"></div>
+    <div id="ps"></div>
+
+<script>
+    async function send(){
+
+        const author = document.getElementById("author").value;
+        const text = document.getElementById("text").value;
+
+        const response = await fetch("/get-post", {
+                method: "POST",
+                headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    author: author,
+                    text: text
+                })
+            });
+
+        if (response.ok) {
+                const data = await response.json();
+                document.getElementById("message").textContent = data.message;
+                document.getElementById("ps").textContent = data.ps;
+            }
+            else
+                console.log(response);
+
+    }
+
+
+</script>
+
 </body>
 </html>
