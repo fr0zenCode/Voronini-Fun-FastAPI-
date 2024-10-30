@@ -1,18 +1,16 @@
-import uuid
+import datetime
 
-from sqlalchemy import Column, UUID, String, Boolean
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, text
+from sqlalchemy.orm import Mapped, mapped_column
 
-
-class Base(DeclarativeBase):
-    ...
+from db.database import Base
 
 
-class User(Base):
+class Users(Base):
 
     __tablename__ = "users"
 
-    user_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4())
+    id = Column(Integer, primary_key=True)
 
     first_name = Column(String, nullable=True)
     second_name = Column(String, nullable=True)
@@ -22,3 +20,22 @@ class User(Base):
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
 
+
+class Publications(Base):
+
+    __tablename__ = "publications"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    text: Mapped[str] = mapped_column(nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
+
+
+class Comments(Base):
+
+    __tablename__ = "comments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    publication_id: Mapped[int] = mapped_column(ForeignKey("publications.id"), nullable=False)
+    text: Mapped[str] = mapped_column(nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
