@@ -9,6 +9,6 @@ class UserForRegistrate(BaseModel):
     password: str
 
 
-class UserForAuthorize(BaseModel):
+class UserForLogin(BaseModel):
     email: str
     password: str
