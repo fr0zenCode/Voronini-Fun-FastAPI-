@@ -43,9 +43,9 @@ def get_login_page(request: Request):
 
 
 @user_router.post("/authorize-user")
-def authorize_user(user_for_authorize: UserForAuthorize):
-    data = {"email": user_for_authorize.email,
-            "password": user_for_authorize.password}
-    print(f"Данные пользователя, которого нужно авторизовать, ну и проверить: \n"
-          f"\n"
-          f"{data}")
+async def authorize_user(user_for_login: UserForLogin):
+    user = await AsyncORM.select_users(email=user_for_login.email, password=user_for_login.password)
+    if not user:
+        print("Такого нет")
+    else:
+        print(user)
