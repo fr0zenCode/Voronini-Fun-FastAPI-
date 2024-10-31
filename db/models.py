@@ -1,41 +1,42 @@
 import datetime
+from typing import Optional, Annotated
 
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, text
+from sqlalchemy import ForeignKey, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db.database import Base
 
 
-class Users(Base):
+integer_primary_key = Annotated[int, mapped_column(primary_key=True)]
+created_date = Annotated[datetime.datetime, mapped_column(server_default=text("TIMEZONE('utc', now())"))]
 
+
+class Users(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
+    id: Mapped[integer_primary_key]
 
-    first_name = Column(String, nullable=True)
-    second_name = Column(String, nullable=True)
-    username = Column(String, nullable=False)
-
-    email = Column(String, nullable=False)
-    password = Column(String, nullable=False)
-    is_active = Column(Boolean, default=True)
+    first_name: Mapped[Optional[str]]
+    second_name: Mapped[Optional[str]]
+    username: Mapped[str]
+    email: Mapped[str]
+    password: Mapped[str]
+    is_active: Mapped[bool] = mapped_column(default=True)
 
 
 class Publications(Base):
-
     __tablename__ = "publications"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    text: Mapped[str] = mapped_column(nullable=False)
-    created_at: Mapped[datetime.datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
+    id: Mapped[integer_primary_key]
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    pub_text: Mapped[str]
+    created_at: Mapped[created_date]
 
 
 class Comments(Base):
-
     __tablename__ = "comments"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    publication_id: Mapped[int] = mapped_column(ForeignKey("publications.id"), nullable=False)
-    text: Mapped[str] = mapped_column(nullable=False)
-    created_at: Mapped[datetime.datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
+    publication_id: Mapped[int] = mapped_column(ForeignKey("publications.id"))
+    comment_text: Mapped[str]
+    created_at: Mapped[created_date]
