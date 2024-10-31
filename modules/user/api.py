@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 
-from modules.user.schemas import UserForRegistrate, UserForAuthorize
+from modules.user.schemas import UserForRegistrate, UserForLogin
+from db.orm import AsyncORM
 
 
 user_router = APIRouter()
@@ -21,13 +22,19 @@ def get_registration_page(request: Request):
 
 
 @user_router.post("/registrate-user")
-def registrate_user(user_for_registrate: UserForRegistrate):
-    print(f"Зарегистрировать чела с данными: \n"
-          f"Имя: {user_for_registrate.first_name} \n"
-          f"Фамилия: {user_for_registrate.second_name} \n"
-          f"Никнейм: {user_for_registrate.username} \n"
-          f"Email: {user_for_registrate.email} \n"
-          f"Пароль: {user_for_registrate.password} \n")
+async def registrate_user(user_for_registrate: UserForRegistrate):
+
+    try:
+        await AsyncORM.add_user_to_db(
+            first_name=user_for_registrate.first_name,
+            second_name=user_for_registrate.second_name,
+            username=user_for_registrate.username,
+            email=user_for_registrate.email,
+            password=user_for_registrate.password
+        )
+        print("Зарегали")
+    except Exception:
+        print("Ошибка")
 
 
 @user_router.get("/login")
