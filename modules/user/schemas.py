@@ -2,8 +2,6 @@ from pydantic import BaseModel, EmailStr
 
 
 class UserForRegistrate(BaseModel):
-    first_name: str
-    second_name: str
     first_name: str | None = None
     second_name: str | None = None
     username: str
@@ -14,3 +12,9 @@ class UserForRegistrate(BaseModel):
 class UserForLogin(BaseModel):
     email: str
     password: str
+
+
+class UserLite(BaseModel):
+    user_id: str
+    username: str
+    email: str
