@@ -1,7 +1,9 @@
+import uuid
+
 from sqlalchemy import text
 
 from db.database import async_engine, async_session_factory
-from db.models import Users, Base
+from db.models import Users, Base, Posts
 
 
 class AsyncORM:
@@ -15,6 +17,7 @@ class AsyncORM:
     @staticmethod
     async def add_user_to_db(first_name, second_name, username, email, password, is_active=True):
         user = Users(
+            user_id=str(uuid.uuid4()),
             first_name=first_name,
             second_name=second_name,
             username=username,
