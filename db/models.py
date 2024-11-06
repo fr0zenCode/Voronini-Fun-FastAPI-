@@ -40,3 +40,12 @@ class Comments(Base):
     publication_id: Mapped[int] = mapped_column(ForeignKey("publications.id"))
     comment_text: Mapped[str]
     created_at: Mapped[created_date]
+
+
+class Tokens(Base):
+    __tablename__ = "tokens"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    access_token: Mapped[str] = mapped_column(unique=True)
+    refresh_token: Mapped[str] = mapped_column(unique=True)
+    user_id: Mapped[integer_primary_key]
