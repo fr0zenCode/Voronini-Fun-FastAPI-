@@ -36,4 +36,12 @@ class Tokens(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     access_token: Mapped[str] = mapped_column(unique=True)
     refresh_token: Mapped[str] = mapped_column(unique=True)
-    user_id: Mapped[integer_primary_key]
+    user_id: Mapped[str]
+
+
+class Posts(Base):
+    __tablename__ = "posts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    author: Mapped[str]
+    text: Mapped[str]
