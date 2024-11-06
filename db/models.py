@@ -14,13 +14,13 @@ created_date = Annotated[datetime.datetime, mapped_column(server_default=text("T
 class Users(Base):
     __tablename__ = "users"
 
-    id: Mapped[integer_primary_key]
+    user_id: Mapped[str] = mapped_column(primary_key=True)
 
     first_name: Mapped[Optional[str]]
     second_name: Mapped[Optional[str]]
     username: Mapped[str]
     email: Mapped[str]
-    password: Mapped[str]
+    password: Mapped[bytes]
     is_active: Mapped[bool] = mapped_column(default=True)
 
 
