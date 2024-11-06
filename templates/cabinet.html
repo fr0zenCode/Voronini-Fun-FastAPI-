@@ -2,11 +2,25 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Личный Кабинет</title>
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/cabinet-style.css">
 </head>
 <body>
 
-    <h1>Пользователь с id - {{ id }}</h1>
+    <div class="content-zone">
+
+        <div class="user-info">
+            <b>User Id: </b>{{ user_id }} <br />
+            <b>Username: </b>{{ username }} <br />
+            <b>Email: </b>{{ email }}
+        </div>
+
+        <button>Logout</button>
+
+    </div>
+
+
+    
 
 </body>
 </html>
