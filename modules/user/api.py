@@ -5,6 +5,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.responses import Response
 
 import auth.utils
+from auth.tokens import create_refresh_token, create_access_token
 from modules.user.schemas import UserForRegistrate, UserForLogin
 from db.orm import AsyncORM
 from config import settings
@@ -18,6 +19,7 @@ http_bearer = HTTPBearer()
 
 @user_router.get("/me")
 def user_cabinet(
+        request: Request,
         jwt_token=Depends(auth.utils.check_cookie)
 ):
     decoded_jwt = jwt.decode(
@@ -25,21 +27,13 @@ def user_cabinet(
         key=settings.auth_jwt.public_key_path.read_text(),
         algorithms=[settings.auth_jwt.algorithm]
     )
-    return {
+    context = {
+        "user_id": decoded_jwt["sub"],
         "username": decoded_jwt["username"],
         "email": decoded_jwt["email"]
     }
 
-
-@user_router.get("/id/{user_id}")
-def user_cabinet(user_id, request: Request, credentials: HTTPAuthorizationCredentials = Depends(http_bearer)):
-    decoded_jwt = jwt.decode(
-        jwt=credentials.credentials,
-        key=settings.auth_jwt.public_key_path.read_text(),
-        algorithms=[settings.auth_jwt.algorithm]
-    )
-    print(decoded_jwt)
-    return templates.TemplateResponse(request=request, name="cabinet.html", context={"id": user_id})
+    return templates.TemplateResponse(request=request, name="cabinet.html", context=context)
 
 
 @user_router.get("/registration")
@@ -70,16 +64,6 @@ def get_login_page(request: Request):
     return templates.TemplateResponse(request=request, name="login.html")
 
 
-def create_access_token(user):
-    jwt_payload = {
-        "sub": user["user_id"],
-        "username": user["username"],
-        "email": user["email"]
-    }
-    access_token = auth.utils.encode_jwt(payload=jwt_payload)
-    return access_token
-
-
 @user_router.post("/authorize-user")
 async def authorize_user(response: Response, user_for_login: UserForLogin):
 
@@ -93,6 +77,7 @@ async def authorize_user(response: Response, user_for_login: UserForLogin):
             print("Неправильные логин и пароль")
             return None
         access_token = create_access_token(user)
-        refresh_token = ...
+        refresh_token = create_refresh_token(user)
         response.set_cookie("jwt", access_token)
-        return {"message": "Я тебя запомнил"}
+        return {"access_token": access_token,
+                "refresh_token": refresh_token}
