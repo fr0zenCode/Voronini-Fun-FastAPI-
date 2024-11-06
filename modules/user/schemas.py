@@ -1,11 +1,13 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class UserForRegistrate(BaseModel):
     first_name: str
     second_name: str
+    first_name: str | None = None
+    second_name: str | None = None
     username: str
-    email: str
+    email: EmailStr
     password: str
 
 
