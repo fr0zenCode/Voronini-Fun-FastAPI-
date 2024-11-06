@@ -62,3 +62,23 @@ class AsyncORM:
                 "password": password
             })
             return {"message": "User has been deleted"}
+
+    @staticmethod
+    async def add_post(author: str, post_text: str):
+        new_post = Posts(
+            author=author,
+            text=post_text
+        )
+
+        async with async_session_factory() as session:
+            session.add(new_post)
+            await session.commit()
+
+    @staticmethod
+    async def get_posts():
+        async with async_session_factory() as session:
+            stmt = text("""SELECT * FROM posts;""")
+            result = await session.execute(stmt)
+            objs = result.fetchall()
+            print(objs)
+            return objs
