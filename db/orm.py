@@ -31,12 +31,29 @@ class AsyncORM:
             await session.commit()
 
     @staticmethod
-    async def select_users(email, password):
-        async with (async_session_factory() as session):
-            stmt = text("""SELECT * FROM users WHERE users.email=:email and users.password=:password;""")
+    async def select_users(email):
+        async with async_session_factory() as session:
+            stmt = text("""SELECT * FROM users WHERE users.email=:email;""")
             result = await session.execute(stmt, {
-                "email": email,
-                "password": password
+                "email": email
+            })
+            obj = result.first()
+            return {
+                "user_id": obj[0],
+                "first_name": obj[1],
+                "second_name": obj[2],
+                "username": obj[3],
+                "email": obj[4],
+                "password": obj[5],
+                "is_active": obj[6]
+            }
+
+    @staticmethod
+    async def get_user_by_username(username: str):
+        async with async_session_factory() as session:
+            stmt = text("""SELECT * FROM users WHERE users.username="username;""")
+            result = await session.execute(stmt, {
+                "username": username
             })
             obj = result.first()
             return {
