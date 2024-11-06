@@ -45,3 +45,20 @@ class AsyncORM:
                 "password": obj[5],
                 "is_active": obj[6]
             }
+
+    @staticmethod
+    async def deactivate_user(user_id, email, password):
+        async with async_session_factory() as session:
+            stmt = text("""
+            UPDATE users 
+            SET users.is_active=False 
+            WHERE users.user_id=:user_id 
+            and users.email=:email 
+            and users.password=:password
+            """)
+            await session.execute(stmt, {
+                "user_id": user_id,
+                "email": email,
+                "password": password
+            })
+            return {"message": "User has been deleted"}
