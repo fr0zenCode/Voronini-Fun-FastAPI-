@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Новости</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/feed-style.css">
+</head>
+<body>
+
+    <div class="content-zone">
+
+        <div class="posts-zone">
+
+            <div class="add-post">
+
+                <input type="text" id="new-post-text">
+                <button action="send_post()">Опубликовать</button>
+    
+            </div>
+
+            {% for post in posts %}
+                <div class="post">
+                    <div class="post-text">
+                        <p><b>Автор: {{ post.author }}</b></p>
+                        <p>{{ post.text }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+
+        
+        </div>
+        
+    
+    </div>
+
+    <script>
+
+async function send_post(){
+
+const text = document.getElementById("new-post-text").value;
+
+    const response = await fetch("feed/new-post", {
+        method: "POST",
+        headers: {"Accept": "application/json", "Content-Type": "application/json"},
+        body: JSON.stringify({
+            author: "Undefined",
+            text: text
+        })
+    })
+    
+
+    }
+
+    </script>
+
+</body>
+</html>
