@@ -14,7 +14,7 @@
             <div class="add-post">
 
                 <input type="text" id="new-post-text">
-                <button action="send_post()">Опубликовать</button>
+                <button onclick="send_post()">Опубликовать</button>
     
             </div>
 
@@ -39,7 +39,7 @@ async function send_post(){
 
 const text = document.getElementById("new-post-text").value;
 
-    const response = await fetch("feed/new-post", {
+    const response = await fetch("/feed/new-post", {
         method: "POST",
         headers: {"Accept": "application/json", "Content-Type": "application/json"},
         body: JSON.stringify({
