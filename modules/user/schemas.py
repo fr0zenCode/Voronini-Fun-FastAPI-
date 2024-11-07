@@ -9,6 +9,15 @@ class UserForRegistrate(BaseModel):
     password: str
 
 
+class UserRepresentation(BaseModel):
+    user_id: str
+    first_name: str
+    second_name: str
+    username: str
+    email: EmailStr
+    password: bytes
+
+
 class UserForLogin(BaseModel):
     email: str
     password: str
