@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional, Annotated
 
-from sqlalchemy import ForeignKey, text
+from sqlalchemy import text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db.database import Base
@@ -10,7 +10,7 @@ created_date = Annotated[datetime.datetime, mapped_column(server_default=text("T
 
 
 class Users(Base):
-    __tablename__ = "users"
+    __tablename__: str = "users"
 
     user_id: Mapped[str] = mapped_column(primary_key=True)
 
