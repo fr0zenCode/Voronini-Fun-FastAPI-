@@ -36,7 +36,11 @@ def add_comment(jwt_token=Depends(check_cookie)):
 
 @feed_router.post("/new-post")
 async def add_new_post(post: Post, jwt_token=Depends(check_cookie)):
-    decoded_jwt = jwt.decode(jwt_token, key=settings.auth_jwt.public_key_path.read_text(), algorithms=[settings.auth_jwt.algorithm])
+    decoded_jwt = jwt.decode(
+        jwt_token,
+        key=settings.auth_jwt.public_key_path.read_text(),
+        algorithms=[settings.auth_jwt.algorithm]
+    )
     print(f"Author: {decoded_jwt['username']} \n"
           f"Text: {post.text}")
 
