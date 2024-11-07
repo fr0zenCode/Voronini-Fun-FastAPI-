@@ -2,7 +2,7 @@ from datetime import timedelta
 
 import auth.utils
 from config import settings
-
+from modules.user.schemas import UserRepresentation
 
 TOKEN_TYPE_FIELD = "type"
 ACCESS_TOKEN_TYPE = "access"
@@ -24,11 +24,11 @@ def create_jwt_token(
     )
 
 
-def create_access_token(user):
+def create_access_token(user: UserRepresentation):
     jwt_payload = {
-        "sub": user["user_id"],
-        "username": user["username"],
-        "email": user["email"]
+        "sub": user.user_id,
+        "username": user.username,
+        "email": user.email
     }
     access_token = create_jwt_token(
         token_type=ACCESS_TOKEN_TYPE,
@@ -37,8 +37,8 @@ def create_access_token(user):
     return access_token
 
 
-def create_refresh_token(user):
-    jwt_payload = {"sub": user["user_id"]}
+def create_refresh_token(user: UserRepresentation):
+    jwt_payload = {"sub": user.user_id}
     refresh_token = create_jwt_token(
         token_type=REFRESH_TOKEN_TYPE,
         payload=jwt_payload,
