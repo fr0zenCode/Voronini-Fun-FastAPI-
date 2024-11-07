@@ -1,14 +1,14 @@
 import jwt
 from fastapi import APIRouter, Request, Depends, Header
 from fastapi.templating import Jinja2Templates
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from starlette.responses import Response
 
 import auth.utils
 from auth.tokens import create_refresh_token, create_access_token
 from modules.user.schemas import UserForRegistrate, UserForLogin
-from db.orm import AsyncORM
 from config import settings
+from .crud import user_crud
 
 user_router = APIRouter()
 
@@ -45,7 +45,7 @@ def get_registration_page(request: Request):
 async def registrate_user(user_for_registrate: UserForRegistrate):
 
     try:
-        await AsyncORM.add_user_to_db(
+        await user_crud.add_user_to_db(
             first_name=user_for_registrate.first_name,
             second_name=user_for_registrate.second_name,
             username=user_for_registrate.username,
@@ -67,13 +67,13 @@ def get_login_page(request: Request):
 @user_router.post("/authorize-user")
 async def authorize_user(response: Response, user_for_login: UserForLogin):
 
-    user = await AsyncORM.select_users(email=user_for_login.email)
+    user = await user_crud.get_user_by_email(email=user_for_login.email)
 
     if not user:
         print("Такого нет")
         return None
     else:
-        if not auth.utils.validate_password(user_for_login.password, user["password"]):
+        if not auth.utils.validate_password(user_for_login.password, user.password):
             print("Неправильные логин и пароль")
             return None
         access_token = create_access_token(user)
