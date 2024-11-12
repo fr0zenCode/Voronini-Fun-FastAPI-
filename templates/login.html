@@ -12,10 +12,17 @@
     <input type="text" id="email" placeholder="email">
     <input type="password" id="password" placeholder="password">
 
+    <a href="#" class="forgot_password" onclick="forgotPassword()">
+        Я забыл пароль, что теперь будет?
+    </a>
+
     <button onclick="send()">Войти</button>
 
 <script>
 
+    async function forgotPassword(){
+        alert("Ну забыл и забыл, что поделаешь");
+    }
     async function send(){
 
         const email = document.getElementById("email").value;
