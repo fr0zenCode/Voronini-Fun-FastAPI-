@@ -11,6 +11,8 @@
 
 <body>
 
+    <button class="back_to_login" onclick="backToLogin()">Back to login</button>
+
     <div class="registration-card">
         
         <h2>Регистрация</h2>
@@ -30,6 +32,11 @@
     </div>
 
     <script>
+
+        async function backToLogin() {
+            document.location.href = '/user/login'
+        }
+
         async function send(){
     
             const password = document.getElementById("password").value;
