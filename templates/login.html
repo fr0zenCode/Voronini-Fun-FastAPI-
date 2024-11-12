@@ -17,12 +17,19 @@
     </a>
 
     <button onclick="send()">Войти</button>
+    <button class="regButton" onclick="redirectToRegistration()">Зарегистрироваться</button>
 
 <script>
 
     async function forgotPassword(){
         alert("Ну забыл и забыл, что поделаешь");
     }
+
+    async function redirectToRegistration(){
+        document.location.href = "/user/registration";
+    }
+
+
     async function send(){
 
         const email = document.getElementById("email").value;
