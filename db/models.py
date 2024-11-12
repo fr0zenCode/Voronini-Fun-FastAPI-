@@ -1,8 +1,8 @@
 import datetime
 from typing import Optional, Annotated
 
-from sqlalchemy import text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import text, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.database import Base
 
@@ -22,6 +22,17 @@ class Users(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
 
 
+class Posts(Base):
+    __tablename__ = "posts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    author_username: Mapped[str]
+    text: Mapped[str]
+    created_at: Mapped[created_date]
+
+    author_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"))
+
+
 class Comments(Base):
     __tablename__ = "comments"
 
@@ -36,12 +47,4 @@ class Tokens(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     access_token: Mapped[str] = mapped_column(unique=True)
     refresh_token: Mapped[str] = mapped_column(unique=True)
-    user_id: Mapped[str]
-
-
-class Posts(Base):
-    __tablename__ = "posts"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    author: Mapped[str]
-    text: Mapped[str]
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"))
