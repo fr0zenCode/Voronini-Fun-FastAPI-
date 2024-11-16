@@ -44,7 +44,5 @@ class Comments(Base):
 class Tokens(Base):
     __tablename__ = "tokens"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    access_token: Mapped[str] = mapped_column(unique=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), primary_key=True)
     refresh_token: Mapped[str] = mapped_column(unique=True)
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"))
