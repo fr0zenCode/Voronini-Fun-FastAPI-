@@ -47,5 +47,8 @@ def validate_password(password: str, hashed_password: bytes) -> bool:
 
 
 def check_cookie(session_id: str = Cookie(alias="jwt")):
-    # print(f"Из utils.py check_cookie: {session_id}")
     return session_id
+
+
+def check_cookie_for_refresh_jwt_token(request):
+    return request.cookies.get('jwt_refresh_token')
