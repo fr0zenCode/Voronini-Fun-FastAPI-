@@ -1,4 +1,4 @@
-from pathlib import Path
+import datetime
 
 import jwt
 from fastapi import APIRouter, Depends, Request
@@ -36,19 +36,33 @@ def add_comment(jwt_token=Depends(check_cookie)):
 
 @feed_router.post("/new-post")
 async def add_new_post(post: Post, jwt_token=Depends(check_cookie)):
-    decoded_jwt = jwt.decode(
-        jwt_token,
-        key=settings.auth_jwt.public_key_path.read_text(),
-        algorithms=[settings.auth_jwt.algorithm]
-    )
-    print(f"Author: {decoded_jwt['username']} \n"
-          f"Text: {post.text}")
 
     if post.text:
-        print(post.text)
-        await AsyncORM.add_post(
-            author=decoded_jwt["username"],
-            post_text=post.text
+
+        decoded_jwt = jwt.decode(
+            jwt_token,
+            key=settings.auth_jwt.public_key_path.read_text(),
+            algorithms=[settings.auth_jwt.algorithm]
         )
 
-    print(f"From add_new_post function: {jwt_token}")
+        new_post = PostInfo(
+            author_username=decoded_jwt["username"],
+            author_id=decoded_jwt["sub"],
+            text=post.text,
+            created_at=datetime.datetime.utcnow()
+        )
+
+        return await post_crud.add_post(new_post)
+    else:
+        return {"message": "failed",
+                "detail": "empty post"}
+
+
+@feed_router.post("/delete-post")
+async def delete_post(post_for_delete: PostForDelete):
+    try:
+        await post_crud.delete_post_by_id(post_for_delete.post_id)
+        return {"message": "successful"}
+    except InterfaceError as db_err:
+        return {"message": "failed",
+                "details": db_err}
