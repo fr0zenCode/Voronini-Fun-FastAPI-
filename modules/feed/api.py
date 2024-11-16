@@ -19,11 +19,6 @@ templates = Jinja2Templates(directory="templates")
 
 
 @feed_router.get("/")
-async def get_feed_page(request: Request, jwt_token: str = Depends(check_cookie)) -> templates.TemplateResponse:
-    print('hello world')
-    posts_from_db = await AsyncORM.get_posts()
-    print(jwt_token)
-    posts = [Post(author=post[1], text=post[2]) for post in posts_from_db]
 async def get_feed_page(request: Request, jwt_token: str = Depends(check_cookie)):
     try:
         decoded_jwt = decode_jwt(
@@ -48,8 +43,6 @@ async def load_more_posts(offset: int, limit: int):
 
     posts = await post_crud.get_more_posts(offset=offset, limit=limit)
 
-    context = {"posts": posts}
-    return templates.TemplateResponse(request=request, name="feed.html", context=context)
     posts = [{
         "post_id": post.post_id,
         "author_username": post.author_username,
