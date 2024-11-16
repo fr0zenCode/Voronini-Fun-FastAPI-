@@ -7,7 +7,19 @@
 </head>
 <body>
 
+    <nav class="navbar">
+        
+        <nav class="navbar-menu">
+            <button type="button" onclick="redirectToFeedPage()">Новости</button>
+            <button type="button" onclick="redirectToUserCabinet()">Личный кабинет</button>
+            <button type="button" onclick="logout()" class="logout-btn">Выйти</button>
+        </nav>
+    
+    </nav>
+
     <div class="content-zone">
+
+        
 
         <div class="user-info">
             <b>User Id: </b>{{ user_id }} <br />
