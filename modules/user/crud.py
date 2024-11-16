@@ -2,7 +2,7 @@ import uuid
 from typing import Callable
 
 from pydantic import EmailStr
-from sqlalchemy import text
+from sqlalchemy import text, select
 
 from db.database import async_session_factory
 from db.models import Users
@@ -23,6 +23,7 @@ class UserCRUD:
             password: bytes,
             is_active: bool = True
     ) -> dict:
+
         user = Users(
             user_id=str(uuid.uuid4()),
             first_name=first_name,
@@ -32,9 +33,26 @@ class UserCRUD:
             password=password,
             is_active=is_active
         )
+
         async with self._session_factory() as session:
+
+            q = select(Users).where(Users.username == username)
+            result = await session.execute(q)
+
+            if result.scalar_one_or_none():
+                return {"message": "unsuccessful",
+                        "detail": "username"}
+
+            q = select(Users).where(Users.email == email)
+            result = await session.execute(q)
+
+            if result.scalar_one_or_none():
+                return {"message": "unsuccessful",
+                        "detail": "email"}
+
             session.add(user)
             await session.commit()
+
         return {"message": "successful"}
 
     def change_first_name(self):
