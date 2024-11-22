@@ -20,6 +20,7 @@ class Users(Base):
     email: Mapped[str]
     password: Mapped[bytes]
     is_active: Mapped[bool] = mapped_column(default=True)
+    last_publication_time = Mapped[datetime.datetime]
 
 
 class Posts(Base):
