@@ -1,25 +1,13 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Личный кабинет</title>
+{% extends 'base.html' %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block links %}
     <link rel="stylesheet" type="text/css" href="/static/css/cabinet-style.css">
-</head>
-<body>
+{% endblock %}
 
-    <nav class="navbar">
-        
-        <nav class="navbar-menu">
-            <button type="button" onclick="redirectToFeedPage()">Новости</button>
-            <button type="button" onclick="redirectToUserCabinet()">Личный кабинет</button>
-            <button type="button" onclick="logout()" class="logout-btn">Выйти</button>
-        </nav>
-    
-    </nav>
-
+{% block content %}
     <div class="content-zone">
-
-        
 
         <div class="user-info">
             <b>User Id: </b>{{ user_id }} <br />
@@ -30,26 +18,8 @@
         <button onclick="logout()">Logout</button>
 
     </div>
+{% endblock %}
 
-    <script>
-
-        async function redirectToUserCabinet() {
-            document.location.href = '/user/me';
-        }
-
-        async function redirectToFeedPage() {;
-            document.location.href = '/feed'
-        }
-
-         async function logout() {
-            alert( document.cookies );
-            const response = await fetch("/user/logout", {
-            method: "POST",
-            headers: {"Accept": "application/json", "Content-Type": "application/json"}})
-            document.location.href = '/user/login';
-        }
-        
-    </script>
-
-</body>
-</html>
+{% block scripts %}
+    <script src="/static/js/cabinet-script.js"></script>
+{% endblock %}
