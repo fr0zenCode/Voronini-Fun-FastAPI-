@@ -41,13 +41,17 @@ class TokensCRUD:
             return False
 
     async def get_refresh_token_by_user_id(self, user_id):
-        async with self._session_factory() as session:
-            result = await self.__select_token_from_db(
-                where_params="tokens.user_id=:user_id",
-                values={"user_id": user_id}
-            )
-            return result
+        result = await self.__select_token_from_db(
+            where_params="tokens.user_id=:user_id",
+            values={"user_id": user_id}
+        )
+        return result
 
+    async def delete_token_by_user_id(self, user_id: str):
+        async with self._session_factory() as session:
+            stmt = text(f"""DELETE FROM tokens WHERE tokens.user_id = :user_id;""")
+            await session.execute(stmt, {"user_id": user_id})
+            await session.commit()
 
 
 tokens_crud = TokensCRUD(async_session_factory)
