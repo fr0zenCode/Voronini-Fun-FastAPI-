@@ -24,56 +24,36 @@ http_bearer = HTTPBearer()
 
 @user_router.get("/me")
 async def user_cabinet(
-        response: Response,
-        request: Request,
-        jwt_tokens=Depends(auth.utils.check_cookie)
+        request: Request
 ):
 
-    try:
-        decoded_jwt = jwt.decode(
-            jwt_tokens,
-            key=settings.auth_jwt.public_key_path.read_text(),
-            algorithms=[settings.auth_jwt.algorithm]
-        )
-        context = {
-           "user_id": decoded_jwt["sub"],
-           "username": decoded_jwt["username"],
-           "email": decoded_jwt["email"]
-        }
+    check_cookies_result = await auth.utils.check_cookie(request=request)
 
-        return templates.TemplateResponse(request=request, name="cabinet.html", context=context, status_code=200)
+    if check_cookies_result == "FALSE":
+        response = RedirectResponse(url='/user/login')
+        response.delete_cookie("jwt")
+        response.delete_cookie("jwt_refresh_token")
+        return response
 
-    except jwt.exceptions.ExpiredSignatureError:
-        jwt_refresh_token = check_cookie_for_refresh_jwt_token(request)
-        decoded_jwt_refresh_token = jwt.decode(
-            jwt_refresh_token,
-            key=settings.auth_jwt.public_key_path.read_text(),
-            algorithms=[settings.auth_jwt.algorithm]
-        )
-        if decoded_jwt_refresh_token['exp'] > datetime.datetime.now().timestamp():
-            user_id = decoded_jwt_refresh_token['sub']
-            # запрос к бд, если такой есть, то установить новый акцес, если нет, то респонс как в элсе
-            user_object = await user_crud.get_user_by_id(user_id)
+    access_token = ""
 
-                # сделать запрос к токенам, надо создавать токен круд...
+    if check_cookies_result == "TRUE":
+        access_token = request.cookies.get("jwt")
 
-            res = await tokens_crud.get_refresh_token_by_user_id(user_id=user_id)
+    if not access_token:
+        access_token = check_cookies_result
 
-            jwt_refresh_from_db = res['refresh_token']
+    decoded_jwt = auth.utils.decode_jwt_token(access_token)
 
-            if jwt_refresh_token == jwt_refresh_from_db:
-                print("Привет")
-                access_token = create_access_token(user_object)
-                response.set_cookie(key="jwt", value=access_token)
+    context = {
+        "user_id": decoded_jwt["sub"],
+        "username": decoded_jwt["username"],
+        "email": decoded_jwt["email"]
+    }
 
-            else:
-                print('ERROR:::::modules/user/api/def user cabinet переданного рефреш токена нет в бд')
-
-        else:
-            response = templates.TemplateResponse("login.html", {"request": request})
-            response.delete_cookie("jwt")
-            response.delete_cookie("jwt_refresh_token")
-            return response
+    response = templates.TemplateResponse(request=request, name="cabinet.html", context=context, status_code=200)
+    response.set_cookie("jwt", access_token)
+    return response
 
 
 @user_router.get("/registration")
