@@ -1,12 +1,9 @@
-import uuid
 from typing import Callable
 
-from pydantic import EmailStr
-from sqlalchemy import text, select
+from sqlalchemy import text
 
 from db.database import async_session_factory
 from db.models import Tokens
-from modules.user.schemas import UserRepresentation
 
 
 class TokensCRUD:
@@ -19,6 +16,7 @@ class TokensCRUD:
         refresh_token = Tokens(user_id=user_id, refresh_token=refresh_jwt_token)
 
         async with self._session_factory() as session:
+            refresh_token = refresh_token or refresh_jwt_token
             session.add(refresh_token)
             await session.commit()
 
@@ -33,7 +31,10 @@ class TokensCRUD:
 
     async def is_refresh_token_exists(self, user_id):
         try:
-            result = await self.__select_token_from_db(where_params="tokens.user_id=:user_id", values={"user_id": user_id})
+            result = await self.__select_token_from_db(
+                where_params="tokens.user_id=:user_id",
+                values={"user_id": user_id}
+            )
             if result:
                 return True
         except Exception:
