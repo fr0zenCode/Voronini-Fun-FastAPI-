@@ -1,11 +1,12 @@
 import datetime
 
 import jwt
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
-from jwt import ExpiredSignatureError
-from starlette.responses import RedirectResponse
+from pydantic import BaseModel
+from starlette.responses import RedirectResponse, Response, JSONResponse
 
+import auth
 from auth.utils import check_cookie, decode_jwt
 from config import settings
 from db.schemas import Post
@@ -13,29 +14,50 @@ from modules.post.schemas import PostInfo, PostForDelete
 from modules.post.crud import post_crud
 from sqlalchemy.exc import InterfaceError
 
+from modules.user.crud import user_crud
+
 feed_router = APIRouter(prefix="/feed", tags=["feed"])
 
 templates = Jinja2Templates(directory="templates")
 
 
+def redirect_to_login_page_and_delete_cookies(login_page_url="/user/login"):
+    response = RedirectResponse(url=login_page_url)
+    response.delete_cookie("jwt")
+    response.delete_cookie("jwt_refresh_token")
+    return response
+
+
 @feed_router.get("/")
-async def get_feed_page(request: Request, jwt_token: str = Depends(check_cookie)):
-    try:
-        decoded_jwt = decode_jwt(
-                token=jwt_token,
-                public_key=settings.auth_jwt.public_key_path.read_text(),
-                algorithm=settings.auth_jwt.algorithm
-            )
-        context = {
-            "posts": await post_crud.get_more_posts(offset=0, limit=10),
-            "current_user_id": decoded_jwt["sub"]
-        }
-        return templates.TemplateResponse(request, "feed.html", context=context)
-    except ExpiredSignatureError:
-        print(request.client)
-        print(jwt_token)
-        print("Срок действия токена истёк")
-        return RedirectResponse("/user/login", status_code=302)
+async def get_feed_page(request: Request):
+
+    check_cookies_result = await auth.utils.check_cookie(request=request)
+
+    if check_cookies_result == "FALSE":
+        return redirect_to_login_page_and_delete_cookies()
+
+    access_token = ""
+
+    if check_cookies_result == "TRUE":
+        access_token = request.cookies.get("jwt")
+
+    if not access_token:
+        access_token = check_cookies_result
+
+    decoded_jwt = jwt.decode(
+        jwt=access_token,
+        key=settings.auth_jwt.public_key_path.read_text(),
+        algorithms=[settings.auth_jwt.algorithm]
+    )
+
+    context = {
+        "posts": await post_crud.get_more_posts(offset=0, limit=10),
+        "current_user_id": decoded_jwt["sub"]
+    }
+
+    response = templates.TemplateResponse(request, "feed.html", context=context)
+    response.set_cookie("jwt", access_token)
+    return response
 
 
 @feed_router.get("/load-more-posts")
