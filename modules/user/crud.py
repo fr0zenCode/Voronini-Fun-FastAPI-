@@ -55,18 +55,6 @@ class UserCRUD:
 
         return {"message": "successful"}
 
-    def change_first_name(self):
-        ...
-
-    def change_second_name(self):
-        ...
-
-    def change_username(self):
-        ...
-
-    def change_password(self):
-        ...
-
     async def __select_users_from_db(self, where_params: str, values: dict) -> UserRepresentation:
         async with self._session_factory() as session:
             stmt = text(f"""SELECT * FROM users WHERE {where_params};""")
@@ -88,9 +76,6 @@ class UserCRUD:
             session.execute(stmt, {"user_id": user_id})
             session.commit()
             return {"message": "successful"}
-
-    async def verify_user_by_email_and_password(self, email: EmailStr, password: str) -> bool:
-        ...
 
     async def get_user_by_email(self, email: EmailStr) -> UserRepresentation:
         return await self.__select_users_from_db(
