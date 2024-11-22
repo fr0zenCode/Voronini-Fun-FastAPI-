@@ -11,7 +11,7 @@ from modules.user.schemas import UserRepresentation
 
 class TokensCRUD:
 
-    def __init__(self, session_factory: Callable):
+    def __init__(self, session_factory: Callable = async_session_factory()):
         self._session_factory = session_factory
 
     async def add_refresh_jwt_token_to_db(self, user_id: str, refresh_jwt_token: str) -> dict:

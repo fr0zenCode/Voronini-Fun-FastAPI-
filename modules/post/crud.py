@@ -10,7 +10,7 @@ from db.models import Posts
 
 class PostCRUD:
 
-    def __init__(self, session_factory: Callable):
+    def __init__(self, session_factory: Callable = async_session_factory()):
         self._session_factory = session_factory
 
     def get_session_factory(self):
