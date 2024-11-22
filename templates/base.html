@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    {% block links %}{% endblock %}
+    <link rel="stylesheet" href="/static/css/base-style.css">
+</head>
+
+<body>
+
+    <div class="main">
+
+        <div class="header" id="header">
+            <a href="/feed">Новости</a>
+            <a href="/user/me">Личный кабинет</a>
+            <a href="/user/logout" class="logout">Выход</a>
+        </div>
+
+        {% block content %}{% endblock %}
+
+        {% block scripts %}{% endblock %}
+
+    </div>
+
+</body>
+</html>
