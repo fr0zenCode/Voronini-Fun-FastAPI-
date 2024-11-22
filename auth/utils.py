@@ -49,8 +49,6 @@ def validate_password(password: str, hashed_password: bytes) -> bool:
     return bcrypt.checkpw(password=password.encode(), hashed_password=hashed_password)
 
 
-def check_cookie(session_id: str = Cookie(alias="jwt")):
-    return session_id
 def decode_jwt_token(
         jwt_token,
         key=settings.auth_jwt.public_key_path.read_text(),
