@@ -37,4 +37,3 @@ async def clean_tables():
         await session.execute(text(f"""TRUNCATE TABLE {table};"""))
         await session.commit()
     await session.close()
-    print("     Фикстура 'clean_tables()' отработала и удалила все данные из таблицы.")
