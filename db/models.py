@@ -2,7 +2,7 @@ import datetime
 from typing import Optional, Annotated
 
 from sqlalchemy import text, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from db.database import Base
 
@@ -31,14 +31,6 @@ class Posts(Base):
     created_at: Mapped[created_date]
 
     author_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"))
-
-
-class Comments(Base):
-    __tablename__ = "comments"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    comment_text: Mapped[str]
-    created_at: Mapped[created_date]
 
 
 class Tokens(Base):
