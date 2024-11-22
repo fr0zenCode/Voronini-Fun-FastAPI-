@@ -1,3 +1,4 @@
+import datetime
 import uuid
 from typing import Callable
 
@@ -95,8 +96,24 @@ class UserCRUD:
             values={"user_id": user_id}
         )
 
-    async def deactivate_user(self, email: EmailStr, password: str):
-        ...
+    async def get_last_publication_time_by_id(self, user_id: str) -> datetime.datetime:
+        async with self._session_factory() as session:
+            stmt = text(f"""SELECT * FROM users WHERE users.user_id = :user_id;""")
+            result = await session.execute(stmt, {
+                "user_id": user_id
+            })
+            obj = result.first()
+            return obj[7]
+
+    async def set_last_publication_time(self, user_id: str, time: datetime.datetime):
+        async with self._session_factory() as session:
+            stmt = text("""UPDATE users SET last_publication_time = :time 
+            WHERE users.user_id = :user_id""")
+            await session.execute(stmt, {
+                "time": time,
+                "user_id": user_id
+            })
+            await session.commit()
 
 
 user_crud = UserCRUD(async_session_factory)
