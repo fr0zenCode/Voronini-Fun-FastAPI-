@@ -1,18 +1,14 @@
-import datetime
 import json
 
-import jwt
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBearer
-from starlette.responses import Response, JSONResponse
+from starlette.responses import JSONResponse, RedirectResponse
 
 from auth.crud import tokens_crud
-from auth.utils import check_cookie_for_refresh_jwt_token
 import auth.utils
 from auth.tokens import create_refresh_token, create_access_token
 from modules.user.schemas import UserForRegistrate, UserForLogin
-from config import settings
 from .crud import user_crud
 
 user_router = APIRouter()
@@ -87,7 +83,7 @@ def get_login_page(request: Request):
 
 
 @user_router.post("/authorize-user")
-async def authorize_user(response: Response, user_for_login: UserForLogin):
+async def authorize_user(user_for_login: UserForLogin):
 
     user = await user_crud.get_user_by_email(email=user_for_login.email)
 
@@ -99,14 +95,15 @@ async def authorize_user(response: Response, user_for_login: UserForLogin):
             return JSONResponse(content={"message": "invalid login or password"}, status_code=304)
 
         access_token = create_access_token(user)
-        response.set_cookie(key="jwt", value=access_token)
+        refresh_token = create_refresh_token(user)
 
-        if await tokens_crud.is_refresh_token_exists(user.user_id):
-            ...
-        else:
-            refresh_token = create_refresh_token(user)
-            response.set_cookie(key="jwt_refresh_token", value=refresh_token, httponly=True)
-            await tokens_crud.add_refresh_jwt_token_to_db(user_id=user.user_id, refresh_jwt_token=refresh_token)
+        await tokens_crud.delete_token_by_user_id(user_id=user.user_id)
+        await tokens_crud.add_refresh_jwt_token_to_db(user_id=user.user_id, refresh_jwt_token=refresh_token)
+
+        response = RedirectResponse(url="/feed", status_code=303)
+        response.set_cookie("jwt", access_token)
+        response.set_cookie("jwt_refresh_token", refresh_token, httponly=True)
+        return response
 
 
 @user_router.post("/logout")
