@@ -55,30 +55,47 @@ async def load_more_posts(offset: int, limit: int):
     return {"posts": posts}
 
 
-@feed_router.post("/comment")
-def add_comment(jwt_token=Depends(check_cookie)):
-    print(f"From add_comment function: {jwt_token}")
+class Post(BaseModel):
+    author: str
+    text: str
 
 
 @feed_router.post("/new-post")
-async def add_new_post(post: Post, jwt_token=Depends(check_cookie)):
+async def add_new_post(post: Post, request: Request, response: Response):
+
+    jwt_token = request.cookies.get("jwt")
+
+    res = await auth.utils.check_cookie(request=request)
+
+    if res == "FALSE":
+        return redirect_to_login_page_and_delete_cookies()
+
+    elif res == "TRUE":
+        ...
+
+    else:
+        jwt_token = res
+
+    response.set_cookie("jwt", jwt_token)
+    decoded_jwt = decode_jwt(jwt_token)
 
     if post.text:
-
-        decoded_jwt = jwt.decode(
-            jwt_token,
-            key=settings.auth_jwt.public_key_path.read_text(),
-            algorithms=[settings.auth_jwt.algorithm]
-        )
-
         new_post = PostInfo(
             author_username=decoded_jwt["username"],
             author_id=decoded_jwt["sub"],
             text=post.text,
-            created_at=datetime.datetime.utcnow()
+            created_at=datetime.datetime.utcnow().replace(microsecond=0)
         )
 
-        return await post_crud.add_post(new_post)
+        last_pub_time = await user_crud.get_last_publication_time_by_id(decoded_jwt["sub"])
+
+        if last_pub_time is None or datetime.datetime.utcnow() - last_pub_time > datetime.timedelta(minutes=5):
+            await post_crud.add_post(new_post)
+            await user_crud.set_last_publication_time(user_id=decoded_jwt["sub"], time=datetime.datetime.utcnow())
+            return {"message": "successful",
+                    "detail": "new post created"}
+        else:
+            return JSONResponse(content={"message": "successful", "detail": "слишком много постов"}, status_code=400)
     else:
         return {"message": "failed",
                 "detail": "empty post"}
