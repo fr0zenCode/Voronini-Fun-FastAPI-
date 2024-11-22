@@ -1,180 +1,43 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Новости</title>
+{% extends 'base.html' %}
+
+{% block links %}
     <link rel="stylesheet" type="text/css" href="/static/css/feed-style.css">
-    
-</head>
-<body>
-    
+{% endblock %}
 
-    <nav class="navbar">
-        
-        <nav class="navbar-menu">
-            <button type="button">Новости</button>
-            <button type="button" onclick="redirectToUserCabinet()">Личный кабинет</button>
-            <button type="button" onclick="logout()" class="logout-btn">Выйти</button>
-        </nav>
-    
-    </nav>
-
-    <div class="content-zone">
-
-        <div class="posts-zone">
-
-            <div class="add-post">
-
-                <input type="text" id="new-post-text">
-                <button onclick="send_post()">Опубликовать</button>
-    
-            </div>
-
-            {% for post in posts %}
-                <div class="post" id="{{ post.post_id }}">
-                    {% if post.author_id == current_user_id %}
-                    <button onclick="delete_post({{ post.post_id }})">Удалить</button>
-                    {% endif %}
-                    <div class="post-text">
-                        <p><b>Автор: {{ post.author_username }}</b></p> <p>{{ post.created_at }}</p>
-                        <p>{{ post.text }}</p>
-                    </div>
-                <input type="text" id="comment" placeholder="Оставьте комментарий...">
-                </div>
-            {% endfor %}
-
-        
-        </div>
-
+{% block content %}
+    <div class="create-post-block">
+        <textarea maxlength="450" placeholder="Напишите свой пост..." id="new-post-text"></textarea>
+        <button class="public-btn" onclick="send_post()">Опубликовать</button>
     </div>
 
-    
-    <script>
+    <div class="posts">
 
-        async function redirectToUserCabinet() {
-            document.location.href = '/user/me';
-        }
+        {% for post in posts %}
+            <div class="post" id="{{ post.post_id }}">
+                <div class="post-content">
 
-        async function logout() {
-            alert("Пока");
-            const response = await fetch("/user/logout", {
-            method: "POST",
-            headers: {"Accept": "application/json", "Content-Type": "application/json"}})
-            document.location.href = '/user/login';
-        }
-
-        let offset = 0; 
-        const limit = 10;
-                    
-
-        // Функция притормаживания
-        function throttle(callee, timeout) {
-            let timer = null
-
-            return function perform(...args) {
-                if (timer) return
-                timer = setTimeout(() => {
-                    callee(...args)
-                    clearTimeout(timer)
-                    timer = null
-                }, timeout)
-            }
-        }
-
-        // Функция обработки прокрутки из Гида по ЖС
-        function checkPosition() {
-            const height = document.body.offsetHeight;
-            const screenHeight = window.innerHeight;
-
-            const scrolled = window.scrollY;
-
-            const threshold = height - screenHeight / 4;
-
-            const position = scrolled + screenHeight;
-
-            if (position >= threshold) {
-                // Вызываем действие
-                loadMorePosts();
-            }
-        }
-                
-        window.addEventListener('scroll', throttle(checkPosition, 250))      
-        window.addEventListener('resize', throttle(checkPosition, 250))
-
-        const currentUserId = {{ current_user_id | tojson }};
-
-                    
-        // Функция для загрузки дополнительных постов
-        async function loadMorePosts() {
-                
-            try {        
-                offset += limit;
-                const response = await fetch(`/feed/load-more-posts?offset=${offset}&limit=${limit}`);
-                const data = await response.json();
-                        
-                const postsZone = document.querySelector('.posts-zone');
-                data.posts.forEach(post => {
-                    const postElement = document.createElement('div');
-                    postElement.className = 'post';
-                    postElement.id = `post-${post.post_id}`;
-                            
-                    // Проверка на авторство поста для отображения кнопки "Удалить"
-                    let deleteButton = '';
-                    // alert('post' + post.author_id);
-                    // alert('cur_user' + currentUserId);
-                    if (post.author_id === currentUserId) {
-                        deleteButton = `<button onclick="deletePost(${post.post_id})">Удалить</button>`;
-                    }
-                    
-                    postElement.innerHTML = `
-                    ${deleteButton}
-                    <div class="post-text">
-                    <p><b>Автор: ${post.author_username}</b></p>
-                    <p>${new Date(post.created_at).toLocaleString()}</p>
-                    <p>${post.text}</p>
+                    <div class="post-header">
+                        <div class="avatar"></div>
+                        <span class="author"><b>{{ post.author_username }}</b></span>
+                        <span class="time">{{ post.created_at }}</span>
                     </div>
-                    <input type="text" placeholder="Оставьте комментарий...">
-                    `;
-                    postsZone.appendChild(postElement);
-                });
-                        
-            
-                        
-                    
-            } catch (error) {    
-                alert("Ошибка!!!!")    
-                console.error("Ошибка при загрузке постов:", error);
-            }
-                
-        }
-                
 
-        async function send_post(){
-            const text = document.getElementById("new-post-text").value;
-            const response = await fetch("/feed/new-post", {
-                method: "POST",
-                headers: {"Accept": "application/json", "Content-Type": "application/json"},
-                body: JSON.stringify({
-                    author: "Undefined",
-                    text: text
-                })
-            })
-            location.reload();
-        }
-                
-        async function delete_post(postID){
-            const response = await fetch("/feed/delete-post", {
-                method: "POST",
-                headers: {"Accept": "application/json", "Content-Type": "application/json"},
-                body: JSON.stringify({
-                    post_id: postID
-                })
-            });
-            if (response.ok) {
-                document.getElementById(postID).remove();
-            }
-        }
-    </script>
+                    <div class="post-text">
+                        {{ post.text }}
+                    </div>
 
-</body>
-</html>
+                    {% if post.author_id == current_user_id %}
+                        <button onclick="delete_post({{post.post_id}})" class="delete-post-btn" type="button">Удалить</button>
+                    {% endif %}
+
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <div id="userData" data-id="{{ current_user_id }}"></div>
+    <script src="/static/js/feed-script.js"></script>
+{% endblock %}
