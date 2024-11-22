@@ -1,7 +1,6 @@
 from typing import Callable
 
 from sqlalchemy import text
-from pydantic import parse_obj_as
 
 from db.database import async_session_factory
 from modules.post.schemas import PostInfo, PostFromDB
