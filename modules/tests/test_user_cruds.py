@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from config import settings
-from ..crud import UserCRUD
+from modules.user.crud import UserCRUD
 
 test_async_engine = create_async_engine(url=settings.test_database_url_asyncpg)
 test_async_session_factory = async_sessionmaker(test_async_engine)
