@@ -104,7 +104,8 @@ async def authorize_user(user_for_login: UserForLogin):
 
 
 @user_router.post("/logout")
-async def logout(request: Request):
-    response = templates.TemplateResponse("login.html", {"request": request})
+async def logout():
+    response = RedirectResponse(url="/user/login")
     response.delete_cookie("jwt")
+    response.delete_cookie("jwt_refresh_token")
     return response
