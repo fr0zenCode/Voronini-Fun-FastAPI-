@@ -2,7 +2,6 @@ import json
 
 from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.security import HTTPBearer
 from starlette.responses import JSONResponse, RedirectResponse
 
 from auth.crud import tokens_crud
@@ -14,8 +13,6 @@ from .crud import user_crud
 user_router = APIRouter()
 
 templates = Jinja2Templates(directory="templates")
-
-http_bearer = HTTPBearer()
 
 
 @user_router.get("/me")
