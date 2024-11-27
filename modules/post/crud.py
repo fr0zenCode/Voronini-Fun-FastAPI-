@@ -66,5 +66,13 @@ class PostCRUD:
             ]
             return available_posts
 
+    async def get_post_by_id(self, post_id):
+        async with self._session_factory() as session:
+            stmt = text("""SELECT * FROM posts WHERE posts.id = :post_id;""")
+            result = await session.execute(stmt, {"post_id": post_id})
+            obj = result.first()
+
+            return PostInfo(author_username=obj[2], author_id=obj[4], text=obj[1], created_at=obj[3])
+
 
 post_crud = PostCRUD(async_session_factory)
