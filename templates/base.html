@@ -16,14 +16,15 @@
         <div class="header" id="header">
             <a href="/feed">Новости</a>
             <a href="/user/me">Личный кабинет</a>
-            <a href="/user/logout" class="logout">Выход</a>
+            <a href="#" onclick="logout()" class="logout">Выход</a>
         </div>
 
         {% block content %}{% endblock %}
 
-        {% block scripts %}{% endblock %}
-
     </div>
+
+    <script src="/static/js/base-script.js"></script>
+    {% block scripts %}{% endblock %}
 
 </body>
 </html>
