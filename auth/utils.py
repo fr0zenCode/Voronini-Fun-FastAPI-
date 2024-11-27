@@ -3,11 +3,19 @@ import jwt
 from datetime import datetime, timedelta
 
 from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
 from auth.crud import tokens_crud
 from auth.tokens import create_access_token
 from config import settings
 from modules.user.crud import user_crud
+
+
+def redirect_to_login_page_and_delete_cookies(login_page_url: str = "/user/login"):
+    response = RedirectResponse(url=login_page_url)
+    response.delete_cookie("jwt")
+    response.delete_cookie("jwt_refresh_token")
+    return response
 
 
 def encode_jwt(
