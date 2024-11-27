@@ -36,7 +36,7 @@ async def user_cabinet(
     if not access_token:
         access_token = check_cookies_result
 
-    decoded_jwt = auth.utils.decode_jwt_token(access_token)
+    decoded_jwt = auth.utils.decode_jwt(access_token)
 
     context = {
         "user_id": decoded_jwt["sub"],
