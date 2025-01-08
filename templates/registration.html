@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/static/css/registration-style.css">
+    <title>Регистрация</title>
+</head>
+<body>
+
+    <div class="container">
+
+        <form id="registrationForm" novalidate>
+
+            <h2>Регистрация</h2>
+
+            <div class="form-control">
+                <label for="first-name">Имя</label>
+                <input type="text" id="first-name" placeholder="Ваше ммя" autocomplete="off">
+                <i class="icon"></i>
+            </div>
+
+            <div class="form-control">
+                <label for="last-name">Фамилия</label>
+                <input type="text" id="last-name" placeholder="Ваша фамилия" autocomplete="off">
+                <i class="icon"></i>
+            </div>
+
+            <div class="form-control">
+                <label for="username">Никнейм</label>
+                <input type="text" id="username" placeholder="Ваш никнейм" autocomplete="off">
+                <i class="icon"></i>
+            </div>
+
+            <div class="form-control">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Ваш email" autocomplete="off">
+                <i class="icon"></i>
+            </div>
+
+            <div class="form-control">
+                <label form="password">Пароль</label>
+                <input type="password" id="password" placeholder="Придумайте пароль" autocomplete="off">
+                <i class="icon"></i>
+            </div>
+
+            <div class="form-control">
+                <label form="password-confirm">Пароль</label>
+                <input type="password" id="password-confirm" placeholder="Повторите пароль" autocomplete="off">
+                <i class="icon"></i>
+            </div>
+
+            <button type="submit" class="registration-btn">Зарегистрироваться</button>
+            <button type="button" class="back-to-login-btn" onclick="backToLoginPage()">
+                Вернуться на страницу входа
+            </button>
+
+        </form>
+
+    </div>
+
+    <script src="/static/js/registration-script.js"></script>
+
+</body>
+</html>
