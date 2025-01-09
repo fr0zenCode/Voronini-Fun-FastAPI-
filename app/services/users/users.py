@@ -14,8 +14,6 @@ from database.tokens.schemas import TokenSchema
 from database.users.repository.sqlalchemy import sqlalchemy_users_repository_factory
 from database.users.schemas import UserAddSchema
 from services.auth.auth import auth_service_factory
-from services.auth.cookies import cookies_manager_factory
-from services.auth.core import hash_password
 from services.users.errors import IncorrectCredentialsError
 
 
@@ -26,12 +24,11 @@ class UsersService:
     tokens_repository = sqlalchemy_tokens_repository_factory()
 
     auth_service = auth_service_factory()
-    cookies_manager = cookies_manager_factory()
 
     async def registrate_user(self, new_user: UserAddSchema):
         try:
             non_hashed_password = new_user.password
-            new_user.password = hash_password(non_hashed_password)
+            new_user.password = self.auth_service.hash_password(non_hashed_password)
             new_user_id = await self.users_repository.add_user(user=new_user)
             return new_user_id
         except (OSError, InterfaceError):
@@ -72,32 +69,17 @@ class UsersService:
         access_token = self.auth_service.create_access_token(user=user)
         refresh_token = self.auth_service.create_refresh_token(user=user)
 
-        await self.cookies_manager.set_token_to_cookies(
-            token=access_token,
-            alias_for_token=self.cookies_manager.ACCESS_TOKEN_COOKIES_ALIAS,
-            response=response
-        )
-
-        await self.cookies_manager.set_token_to_cookies(
-            token=refresh_token,
-            alias_for_token=self.cookies_manager.REFRESH_TOKEN_COOKIES_ALIAS,
-            response=response
-        )
+        response.set_cookie(key="access-token", value=access_token)
+        response.set_cookie(key="refresh-token", value=refresh_token)
 
         await self.tokens_repository.add_token(token=TokenSchema(refresh_token=refresh_token, user_id=user.id))
 
     async def logout(self, response: Response, request: Request):
         await self.auth_service.is_user_authorized(request=request, response=response)
-        await self.tokens_repository.delete_token_by_user_id(self.auth_service.get_user_id_from_jwt(request=request))
-        await self.tokens_repository.delete_token_by_user_id()
-        await self.cookies_manager.delete_token_from_cookies(
-            alias_for_token=self.auth_service.ACCESS_TOKEN_COOKIES_ALIAS,
-            response=response
-        )
-        await self.cookies_manager.delete_token_from_cookies(
-            alias_for_token=self.auth_service.REFRESH_TOKEN_COOKIES_ALIAS,
-            response=response
-        )
+        user_id = await self.auth_service.get_user_id_from_jwt(request=request)
+        await self.tokens_repository.delete_token_by_user_id(user_id=user_id)
+        response.delete_cookie(key="access-token")
+        response.delete_cookie(key="refresh-token")
 
 
 def users_service_factory():
