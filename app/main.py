@@ -5,11 +5,12 @@ from fastapi import FastAPI
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 
+from api.test.api import test_router
 from api.user.api import user_router
 from api.feed.api import feed_router
 from database.errors import DatabaseLoseConnection, DatabaseTablesErrors, UserWithTheSameUsernameIsAlreadyExistsError, \
     UserWithTheSameEmailIsAlreadyExistsError, DatabaseColumnsErrors
-from services.users.errors import IncorrectCredentialsError
+from services.users.errors import IncorrectCredentialsError, UserNotAuthorizedError
 
 BASE_DIR = Path(__file__).parent
 static_folder = "static"
@@ -68,8 +69,17 @@ async def incorrect_user_credentials_for_login_error_handler(request: Request, e
     )
 
 
+@app.exception_handler(UserNotAuthorizedError)
+async def user_not_authorized_error_handler(request: Request, exception: UserNotAuthorizedError):
+    raise HTTPException(
+        status_code=401,
+        detail=exception.message
+    )
+
+
 app.include_router(user_router)
 app.include_router(feed_router)
+app.include_router(test_router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
