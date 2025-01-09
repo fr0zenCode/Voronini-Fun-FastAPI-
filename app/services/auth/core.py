@@ -3,9 +3,11 @@ from datetime import timedelta
 
 import bcrypt
 import jwt
+from jwt import DecodeError
 
 from database.users.schemas import UserSchema
 from app.config import settings
+from services.users.errors import UserNotAuthorizedError
 
 
 def encode_jwt(
@@ -34,14 +36,11 @@ def decode_jwt(
         public_key: str = settings.auth_jwt.public_key_path.read_text(),
         algorithm: str = settings.auth_jwt.algorithm
 ):
-    decoded_jwt = jwt.decode(jwt_for_decode, public_key, algorithms=[algorithm])
-    return decoded_jwt
-
-
-def hash_password(password: str) -> bytes:
-    salt = bcrypt.gensalt()
-    password_bytes = password.encode()
-    return bcrypt.hashpw(password_bytes, salt)
+    try:
+        decoded_jwt = jwt.decode(jwt_for_decode, public_key, algorithms=[algorithm])
+        return decoded_jwt
+    except DecodeError:
+        raise UserNotAuthorizedError()
 
 
 def create_jwt_token(
@@ -59,6 +58,3 @@ def create_jwt_token(
         expire_minutes=expire_minutes,
         expire_timedelta=expire_timedelta,
     )
-
-
-
