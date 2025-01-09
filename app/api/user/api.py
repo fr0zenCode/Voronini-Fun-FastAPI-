@@ -13,9 +13,6 @@ user_router = APIRouter(prefix="/user", tags=["User"])
 templates = Jinja2Templates(directory="templates")
 
 
-
-
-
 @user_router.get("/me")
 async def user_cabinet(
         response: Response,
@@ -23,22 +20,13 @@ async def user_cabinet(
         auth_service: Annotated[AuthService, Depends(auth_service_factory)]
 ):
 
-    decoded_jwt = await auth_service.is_user_authorized(request=request, response=response)
-    return decoded_jwt
+    access_token = await auth_service.is_user_authorized(access_token=request.cookies.get("access-token"),
+                                                         refresh_token=request.cookies.get("refresh-token"))
 
+    response.set_cookie(key=auth_service.ACCESS_TOKEN_COOKIES_ALIAS, value=access_token)
 
-    #return templates_service.create_user_cabinet_template(decoded_jwt=decoded_jwt)
-
-
-# @user_router.get("/login")
-# def get_login_page(request: Request):
-#     return templates_service.create_login_template(request=request)
-#
-#
-# @user_router.get("/registration")
-# def get_registration_page(request: Request):
-#     return templates_servuce.create_registration_template(request=request)
-#
+    user_info = await auth_service.convert_jwt_to_read_format(jwt=access_token)
+    return user_info
 
 
 @user_router.post("/registrate-user")
