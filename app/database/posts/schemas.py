@@ -16,3 +16,7 @@ class PostSchema(BaseModel):
     author_id: int
     text_content: str
     created_at: datetime
+
+
+class AddFromFastAPIPostSchema(BaseModel):
+    text_content: str
