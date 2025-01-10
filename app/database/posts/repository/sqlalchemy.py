@@ -38,6 +38,7 @@ class SQLAlchemyPostsRepository(AbstractPostsRepository):
     async def get_more_posts(self, offset: int, limit: int) -> list[PostSchema]:
         async with self._async_session_factory() as session:
             stmt = select(Posts).limit(limit).offset(offset)
+            print(f"limit {limit}, offset {offset}")
             result = await session.execute(stmt)
             rows = result.scalars().all()
             return [row.to_pydantic_model() for row in rows]

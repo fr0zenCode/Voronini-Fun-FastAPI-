@@ -32,8 +32,10 @@ class UsersService:
             new_user_id = await self.users_repository.add_user(user=new_user)
             return new_user_id
         except (OSError, InterfaceError):
+            print("services/users/users.py/registrate_user --- Нет соединения с БД.")
             raise DatabaseLoseConnection()
         except ProgrammingError:
+            print("services/users/users.py/registrate_user --- Нарушение консистентности..")
             raise DatabaseTablesErrors()
         except IntegrityError:
 
@@ -78,8 +80,6 @@ class UsersService:
         await self.auth_service.is_user_authorized(request=request, response=response)
         user_id = await self.auth_service.get_user_id_from_jwt(request=request)
         await self.tokens_repository.delete_token_by_user_id(user_id=user_id)
-        response.delete_cookie(key="access-token")
-        response.delete_cookie(key="refresh-token")
 
 
 def users_service_factory():

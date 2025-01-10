@@ -25,6 +25,8 @@ def encode_jwt(
     else:
         expire = now + timedelta(minutes=expire_minutes)
 
+    print(expire)
+
     payload_to_encode.update(exp=expire, iat=now)
     encoded_jwt = jwt.encode(payload_to_encode, private_key, algorithm=algorithm)
 
@@ -40,6 +42,7 @@ def decode_jwt(
         decoded_jwt = jwt.decode(jwt_for_decode, public_key, algorithms=[algorithm])
         return decoded_jwt
     except DecodeError:
+        print("services/auth/core.py/decode_jwt --- Не удалось декодировать JWT.")
         raise UserNotAuthorizedError()
 
 
