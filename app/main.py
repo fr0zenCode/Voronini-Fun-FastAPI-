@@ -5,9 +5,11 @@ from fastapi import FastAPI
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 
+from api.feed.api import feed_router
+from api.posts.api import post_router
 from api.test.api import test_router
 from api.user.api import user_router
-from api.feed.api import feed_router
+
 from database.errors import DatabaseLoseConnection, DatabaseTablesErrors, UserWithTheSameUsernameIsAlreadyExistsError, \
     UserWithTheSameEmailIsAlreadyExistsError, DatabaseColumnsErrors
 from services.users.errors import IncorrectCredentialsError, UserNotAuthorizedError
@@ -80,6 +82,7 @@ async def user_not_authorized_error_handler(request: Request, exception: UserNot
 app.include_router(user_router)
 app.include_router(feed_router)
 app.include_router(test_router)
+app.include_router(post_router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
