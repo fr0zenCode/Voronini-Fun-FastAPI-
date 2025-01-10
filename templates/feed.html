@@ -7,8 +7,16 @@
 {% block content %}
     <div class="create-post-block">
         <textarea maxlength="450" placeholder="Напишите свой пост..." id="new-post-text"></textarea>
+        <label for="new-post-text" class="error-lbl" id="error-lbl"></label>
         <button class="public-btn" onclick="send_post()">Опубликовать</button>
     </div>
+
+    <div class="page-parameters">
+        
+        <button class="refresh-btn" id="refresh-btn">Обновить ленту</button>
+
+    </div>
+
 
     <div class="posts">
 
@@ -27,8 +35,14 @@
                     </div>
 
                     {% if post.author_id == current_user_id %}
-                        <button onclick="delete_post({{post.post_id}})" class="delete-post-btn" type="button">Удалить</button>
+                        <!-- <button onclick="delete_post({{post.post_id}})" class="delete-post-btn" type="button">Удалить</button> -->
+                        <button class="delete-post-btn" data-post-id="{{ post.post_id }}">Удалить</button>
                     {% endif %}
+
+                    <div class="post-comment">
+                        <input type="text" placeholder="Введите комментарий..." data-post-id="{{ post.post_id }}">
+                        <button type="button" class="send-comment-btn" id="send-comment-btn" data-post-id="{{ post.post_id }}">Отправить</button>
+                    </div>
 
                 </div>
             </div>
