@@ -20,7 +20,7 @@ class SQLAlchemyPostsRepository(AbstractPostsRepository):
             stmt = insert(Posts).values(
                 author_username=post.author_username,
                 author_id=post.author_id,
-                text=post.text_content,
+                text_content=post.text_content,
                 created_at=post.created_at
             ).returning(Posts.id)
 
