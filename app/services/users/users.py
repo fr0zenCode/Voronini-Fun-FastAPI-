@@ -11,7 +11,6 @@ from database.repositories.tokens.repository.sqlalchemy import sqlalchemy_tokens
 from database.repositories.tokens.schemas import TokenSchema
 from database.repositories.users.repository.sqlalchemy import sqlalchemy_users_repository_factory
 from database.repositories.users.schemas import UserAddSchema, UserSchema
-from services.auth.auth import auth_service_factory
 from services.users.errors import IncorrectCredentialsError
 from logger import logger
 
