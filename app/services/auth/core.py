@@ -1,14 +1,12 @@
 import datetime
 from datetime import timedelta
 
-import bcrypt
 import jwt
 from jwt import DecodeError
 
-from database.users.schemas import UserSchema
-from app.config import settings
+from app.settings import settings
 from services.users.errors import UserNotAuthorizedError
-
+from logger import logger
 
 def encode_jwt(
         payload: dict,
@@ -28,16 +26,16 @@ def encode_jwt(
 
     :return: **str** - encoded JWT
     """
+    payload_for_encode = payload.copy()
+    now = datetime.datetime.now(datetime.timezone.utc)
 
     if expire_timedelta:
         expire = now + expire_timedelta
     else:
         expire = now + timedelta(minutes=expire_minutes)
 
-    print(expire)
-
-    payload_to_encode.update(exp=expire, iat=now)
-    encoded_jwt = jwt.encode(payload_to_encode, private_key, algorithm=algorithm)
+    payload_for_encode.update(exp=expire, iat=now)
+    encoded_jwt = jwt.encode(payload_for_encode, private_key, algorithm=algorithm)
 
     return encoded_jwt
 
@@ -62,7 +60,7 @@ def decode_jwt(
         decoded_jwt = jwt.decode(jwt_for_decode, public_key, algorithms=[algorithm])
         return decoded_jwt
     except DecodeError:
-        print("services/auth/core.py/decode_jwt --- Не удалось декодировать JWT.")
+        logger.debug("Не удалось декодировать JWT")
         raise UserNotAuthorizedError()
 
 
