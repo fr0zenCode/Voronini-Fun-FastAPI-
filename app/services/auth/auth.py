@@ -5,12 +5,13 @@ import bcrypt
 from jwt import ExpiredSignatureError
 from starlette.requests import Request
 
-from database.tokens.repository.sqlalchemy import sqlalchemy_tokens_repository_factory
-from database.tokens.schemas import TokenSchema
-from database.users.repository.sqlalchemy import sqlalchemy_users_repository_factory
-from database.users.schemas import UserSchema
+from database.repositories.tokens.repository.sqlalchemy import sqlalchemy_tokens_repository_factory
+from database.repositories.tokens.schemas import TokenSchema
+from database.repositories.users.repository.sqlalchemy import sqlalchemy_users_repository_factory
+from database.repositories.users.schemas import UserSchema
 from .core import decode_jwt, create_jwt_token
 from ..users.errors import UserNotAuthorizedError
+from logger import logger
 
 
 @dataclass
@@ -83,9 +84,7 @@ class AuthService:
             decode_jwt(token)
             return True
         except ExpiredSignatureError:
-            if refresh_token_mode:
-                print("refresh-token тоже просрочен. Необходимо заново аутентифицироваться.")
-                raise UserNotAuthorizedError()
+            logger.info(f"Токен {token} просрочен. Необходимо заново пройти процедуру аутентификации.")
             return False
 
     @staticmethod
@@ -129,29 +128,30 @@ class AuthService:
         refresh_token_model_from_db = await self.tokens_repository.get_token_by_user_id(user_id=user_id)
         if refresh_token_model_from_db.refresh_token == refresh_token:
             return True
-        print("refresh-token из cookies не совпал с токеном из Базы Данных. Приходется пройти процедуру аутенификации.")
+        logger.info("refresh-token из cookies не совпал с refresh-token'ом из базы данных")
         raise UserNotAuthorizedError()
 
     async def is_user_authorized(self, access_token: str, refresh_token: str):
 
         if self.is_token_alive(token=access_token, refresh_token_mode=False):
             print("access-token действителен, ничего не требуется. Продолжаем.")
+            logger.debug("access-token действителен, ничего не требуется. Продолжаем.")
             return access_token
 
-        print("access-token просрочен. Проверяем возможность генерации нового на основании refresh-token'a.")
+        logger.debug("Access-token просрочен. Проверяем возможность генерации нового на основании refresh-token'а.")
 
-        if self.is_token_alive(token=refresh_token, refresh_token_mode=True):
-
-            print("refresh-token действителен. Начинаем создание нового access-token'a.")
+        if self.is_token_alive(token=refresh_token):
+            logger.debug("refresh-token действителен. Начинаем создание нового access-token'а.")
 
             user_id = decode_jwt(refresh_token)["user_id"]
             await self.compare_refresh_token_with_database_version(refresh_token=refresh_token, user_id=user_id)
-            print("Соответствие refresh-token'a с токеном из БД подтверждено.")
+
+            logger.debug("Соответствие refresh-token'а с токеном из БД подтверждено.")
             new_access_token = await self.create_access_token_by_refresh_token(refresh_token)
-            print("Новый access-token создан.")
+            logger.debug("Новый access-token создан.")
             return new_access_token
 
-        print("refresh-token также просрочен. Приходется пройти процедуру аутентификации.")
+        logger.debug("Refresh-token также просрочен. Придётся пройти процедуру аутентификации.")
 
 
 def auth_service_factory():
