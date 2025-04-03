@@ -24,7 +24,7 @@ async def add_post(
                                                          refresh_token=request.cookies.get("jwt_refresh_token"))
 
     response.set_cookie(key=auth_service.ACCESS_TOKEN_COOKIES_ALIAS, value=access_token)
-    user_info = await auth_service.convert_jwt_to_read_format(jwt=access_token)
+    user_info = auth_service.convert_jwt_to_read_format(jwt=access_token)
 
     add_post_schema = AddPostSchema(
         author_username=user_info["username"],
@@ -52,7 +52,10 @@ async def delete_post_by_id(
 
     response.set_cookie(key=auth_service.ACCESS_TOKEN_COOKIES_ALIAS, value=access_token)
     await posts_service.delete_post(post_id=post_id)
-    return {"message": f"post with id {post_id} successfully deleted."}
+    return {
+        "message": "successful",
+        "detail": f"post with id {post_id} deleted"
+    }
 
 
 @post_router.get("/get-post-by-id")
