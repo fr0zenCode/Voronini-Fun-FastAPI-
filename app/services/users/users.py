@@ -102,6 +102,12 @@ class UsersService:
         user_id = await auth_service.get_user_id_from_jwt(request=request)
         await self.tokens_repository.delete_token_by_user_id(user_id=user_id)
 
+    async def get_user_by_id(self, user_id: int) -> UserSchema:
+        return await self.users_repository.get_user_by_id(user_id=user_id)
+
+    async def get_user_by_email(self, email: str) -> UserSchema:
+        return await self.users_repository.get_user_by_email(email=email)
+
 
 def users_service_factory():
     return UsersService()
