@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 
-from database.tokens.schemas import TokenSchema
+from database.repositories.tokens.schemas import TokenSchema
 
 
 class AbstractTokensRepository(ABC):
 
     @abstractmethod
-    async def add_token(self, token: TokenSchema):
+    async def add_token(self, token: TokenSchema) -> dict:
         ...
 
     @abstractmethod

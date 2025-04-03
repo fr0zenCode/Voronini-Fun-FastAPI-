@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 from pydantic import EmailStr
 
-from database.users.schemas import UserAddSchema, UserSchema
+from database.repositories.users.schemas import UserAddSchema, UserSchema
 
 
 class AbstractUsersRepository(ABC):

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from database.posts.schemas import AddPostSchema, PostSchema
+from database.repositories.posts.schemas import AddPostSchema, PostSchema
 
 
 class AbstractPostsRepository(ABC):
