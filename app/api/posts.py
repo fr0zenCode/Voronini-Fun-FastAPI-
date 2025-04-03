@@ -20,8 +20,8 @@ async def add_post(
         posts_service: Annotated[PostsService, Depends(posts_service_factory)],
         post: AddFromFastAPIPostSchema
 ) -> PostSchema:
-    access_token = await auth_service.is_user_authorized(access_token=request.cookies.get("access-token"),
-                                                         refresh_token=request.cookies.get("refresh-token"))
+    access_token = await auth_service.is_user_authorized(access_token=request.cookies.get("jwt"),
+                                                         refresh_token=request.cookies.get("jwt_refresh_token"))
 
     response.set_cookie(key=auth_service.ACCESS_TOKEN_COOKIES_ALIAS, value=access_token)
     user_info = await auth_service.convert_jwt_to_read_format(jwt=access_token)
@@ -29,7 +29,7 @@ async def add_post(
     add_post_schema = AddPostSchema(
         author_username=user_info["username"],
         author_id=user_info["id"],
-        created_at=datetime.datetime.utcnow(),
+        created_at=datetime.datetime.now(datetime.timezone.utc),
         text_content=post.text_content
     )
 
@@ -47,8 +47,8 @@ async def delete_post_by_id(
         auth_service: Annotated[AuthService, Depends(auth_service_factory)],
         posts_service: Annotated[PostsService, Depends(posts_service_factory)]
 ) -> dict:
-    access_token = await auth_service.is_user_authorized(access_token=request.cookies.get("access-token"),
-                                                         refresh_token=request.cookies.get("refresh-token"))
+    access_token = await auth_service.is_user_authorized(access_token=request.cookies.get("jwt"),
+                                                         refresh_token=request.cookies.get("jwt_refresh_token"))
 
     response.set_cookie(key=auth_service.ACCESS_TOKEN_COOKIES_ALIAS, value=access_token)
     await posts_service.delete_post(post_id=post_id)
