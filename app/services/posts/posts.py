@@ -4,9 +4,10 @@ from database.posts.schemas import AddPostSchema, PostSchema
 from .abstract import AbstractPostsService
 
 
-class PostsService(AbstractPostsService):
+class PostsService:
 
-    posts_repository: AbstractPostsRepository = sqlalchemy_posts_repository_factory()
+    def __init__(self):
+        self.posts_repository: AbstractPostsRepository = sqlalchemy_posts_repository_factory()
 
     async def add_post(self, post: AddPostSchema) -> int:
         new_post_id = await self.posts_repository.add_post(post=post)
