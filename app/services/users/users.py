@@ -21,7 +21,13 @@ class UsersService:
         self.users_repository = sqlalchemy_users_repository_factory()
         self.tokens_repository = sqlalchemy_tokens_repository_factory()
 
-    auth_service = auth_service_factory()
+    async def registrate_user(self, new_user: UserAddSchema) -> int:
+        """
+        :param new_user: ``UserAddSchema`` данные пользователя, упакованные в Pydantic-class
+        :return: ``int`` new_user_id
+        """
+        from services.auth.auth import auth_service_factory
+        auth_service = auth_service_factory()
 
         try:
             non_hashed_password = new_user.password
@@ -50,14 +56,25 @@ class UsersService:
 
             raise DatabaseColumnsErrors()
 
-    async def authenticate_user(self, email, password, response: Response):
+    async def authenticate_user(self, email, password) -> dict[str, str]:
+        """
+        В функцию передаются email и пароль пользователя. В случае, если функция не вызвала никакого исключения,
+        данные пользователя считаются аутентичными.
 
+        **return example:** \n
+            {
+                "access_token": access_token, \n
+                "refresh_token": refresh_token \n
+            }
+        """
+        from services.auth.auth import auth_service_factory
+        auth_service = auth_service_factory()
         try:
             user = await self.users_repository.get_user_by_email(email=email)
         except NoResultFound:
             raise IncorrectCredentialsError()
 
-        if not self.auth_service.validate_password(password, user.password):
+        if not auth_service.validate_password(password, user.password):
             raise IncorrectCredentialsError()
 
         try:
@@ -65,11 +82,10 @@ class UsersService:
         except (OSError, InterfaceError):
             raise DatabaseLoseConnection()
 
-        access_token = self.auth_service.create_access_token(user=user)
-        refresh_token = self.auth_service.create_refresh_token(user=user)
+        access_token = auth_service.create_access_token(user=user)
+        refresh_token = auth_service.create_refresh_token(user=user)
 
-        response.set_cookie(key="access-token", value=access_token)
-        response.set_cookie(key="refresh-token", value=refresh_token)
+        await self.tokens_repository.add_token(TokenSchema(user_id=user.id, refresh_token=refresh_token))
 
         return {
             "access_token": access_token,
@@ -77,8 +93,13 @@ class UsersService:
         }
 
     async def logout(self, response: Response, request: Request):
-        await self.auth_service.is_user_authorized(request=request, response=response)
-        user_id = await self.auth_service.get_user_id_from_jwt(request=request)
+        """
+        Если пользователь авторизован, то функция удаляет его токен из базы данных.
+        """
+        from services.auth.auth import auth_service_factory
+        auth_service = auth_service_factory()
+        await auth_service.is_user_authorized(request=request, response=response)
+        user_id = await auth_service.get_user_id_from_jwt(request=request)
         await self.tokens_repository.delete_token_by_user_id(user_id=user_id)
 
 
