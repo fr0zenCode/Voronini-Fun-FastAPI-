@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from starlette.requests import Request
 from starlette.responses import Response
 from sqlalchemy.exc import ProgrammingError, InterfaceError, IntegrityError, NoResultFound
@@ -9,12 +7,13 @@ from database.errors import (DatabaseLoseConnection,
                              UserWithTheSameUsernameIsAlreadyExistsError,
                              UserWithTheSameEmailIsAlreadyExistsError,
                              DatabaseColumnsErrors)
-from database.tokens.repository.sqlalchemy import sqlalchemy_tokens_repository_factory
-from database.tokens.schemas import TokenSchema
-from database.users.repository.sqlalchemy import sqlalchemy_users_repository_factory
-from database.users.schemas import UserAddSchema
+from database.repositories.tokens.repository.sqlalchemy import sqlalchemy_tokens_repository_factory
+from database.repositories.tokens.schemas import TokenSchema
+from database.repositories.users.repository.sqlalchemy import sqlalchemy_users_repository_factory
+from database.repositories.users.schemas import UserAddSchema, UserSchema
 from services.auth.auth import auth_service_factory
 from services.users.errors import IncorrectCredentialsError
+from logger import logger
 
 
 @dataclass
