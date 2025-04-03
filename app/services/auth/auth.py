@@ -133,8 +133,14 @@ class AuthService:
 
     async def is_user_authorized(self, access_token: str, refresh_token: str):
 
-        if self.is_token_alive(token=access_token, refresh_token_mode=False):
-            print("access-token действителен, ничего не требуется. Продолжаем.")
+        :return: ``access_token`` в случае, если переданный access-token действителен или удалось сгенерировать новый по-действительному refresh-token'у. ``None`` в случае, когда оба токена просрочены и необходимо заново пройти процедуру аутентификации.
+        """
+
+        if not access_token or not refresh_token:
+            logger.error("Не передан access или refresh токен")
+            return None
+
+        if self.is_token_alive(token=access_token):
             logger.debug("access-token действителен, ничего не требуется. Продолжаем.")
             return access_token
 
@@ -153,6 +159,8 @@ class AuthService:
 
         logger.debug("Refresh-token также просрочен. Придётся пройти процедуру аутентификации.")
 
+    async def delete_token_from_db_by_user_id(self, user_id: int) -> None:
+        self.tokens_repository.delete_token_by_user_id(user_id=user_id)
 
 def auth_service_factory():
     return AuthService()
