@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends
 from starlette.requests import Request
 from starlette.responses import Response
 
-from database.posts.schemas import AddPostSchema, AddFromFastAPIPostSchema, PostSchema
+from database.repositories.posts.schemas import AddPostSchema, AddFromFastAPIPostSchema, PostSchema
 from services.auth.auth import auth_service_factory, AuthService
-from services.posts.posts import AbstractPostsService, posts_service_factory
+from services.posts.posts import posts_service_factory, PostsService
 
 post_router = APIRouter(prefix="/posts", tags=["Posts API"])
 
@@ -17,7 +17,7 @@ async def add_post(
         request: Request,
         response: Response,
         auth_service: Annotated[AuthService, Depends(auth_service_factory)],
-        posts_service: Annotated[AbstractPostsService, Depends(posts_service_factory)],
+        posts_service: Annotated[PostsService, Depends(posts_service_factory)],
         post: AddFromFastAPIPostSchema
 ) -> PostSchema:
     access_token = await auth_service.is_user_authorized(access_token=request.cookies.get("access-token"),
@@ -45,7 +45,7 @@ async def delete_post_by_id(
         request: Request,
         response: Response,
         auth_service: Annotated[AuthService, Depends(auth_service_factory)],
-        posts_service: Annotated[AbstractPostsService, Depends(posts_service_factory)]
+        posts_service: Annotated[PostsService, Depends(posts_service_factory)]
 ) -> dict:
     access_token = await auth_service.is_user_authorized(access_token=request.cookies.get("access-token"),
                                                          refresh_token=request.cookies.get("refresh-token"))
@@ -58,7 +58,7 @@ async def delete_post_by_id(
 @post_router.get("/get-post-by-id")
 async def get_post_by_id(
         post_id: int,
-        posts_service: Annotated[AbstractPostsService, Depends(posts_service_factory)]
+        posts_service: Annotated[PostsService, Depends(posts_service_factory)]
 ) -> PostSchema:
     post = await posts_service.get_post_by_id(post_id=post_id)
     return post
@@ -66,7 +66,7 @@ async def get_post_by_id(
 
 @post_router.get("/get-all-posts")
 async def get_all_posts(
-        posts_service: Annotated[AbstractPostsService, Depends(posts_service_factory)]
+        posts_service: Annotated[PostsService, Depends(posts_service_factory)]
 ) -> list[PostSchema]:
     posts = await posts_service.get_all_posts()
     return posts
