@@ -16,7 +16,7 @@ class UserSchema(BaseModel):
     first_name: str
     second_name: str
     username: str
-    email: EmailStr
+    email: str
     password: str
     last_publication_time: datetime.datetime | None
 
