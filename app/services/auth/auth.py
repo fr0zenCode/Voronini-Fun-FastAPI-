@@ -61,11 +61,24 @@ class AuthService:
         )
         return refresh_token
 
-    async def add_refresh_token_to_database(self, refresh_token_schema: TokenSchema):
+    async def add_refresh_token_to_database(self, refresh_token_schema: TokenSchema) -> None:
+        """
+        Добавляет refresh-token в базу данных токенов.
+
+        :param refresh_token_schema: **TokenSchema**
+        :return: None
+        """
         await self.tokens_repository.add_token(token=refresh_token_schema)
 
     @staticmethod
-    def is_token_alive(token: str, refresh_token_mode: bool = False) -> bool:
+    def is_token_alive(token: str) -> bool:
+        """
+        Если функция не инициировала вызов исключения, токен считается действительным. "Под капотом" используется
+        функция ``.decode()`` из библиотеки **PyJWT**.
+
+        :param token: **str** - токен для проверки, должен быть JWT токеном, т.к. используется функция **.decode()** из библиотеки **PyJWT**
+        :return: **bool** - в случае, когда токен действителен. В обратном случае инициируется исключение.
+        """
         try:
             decode_jwt(token)
             return True
@@ -76,7 +89,15 @@ class AuthService:
             return False
 
     @staticmethod
-    async def convert_jwt_to_read_format(jwt: str) -> dict:
+    def convert_jwt_to_read_format(jwt: str) -> dict:
+        """
+        **return example:** \n
+            {
+                "id": "random-id-123456", \n
+                "username": "ivanov", \n
+                "email": "example@email.com" \n
+            }
+        """
         decoded_jwt = decode_jwt(jwt)
         return {
             "id": decoded_jwt["user_id"],
@@ -96,7 +117,15 @@ class AuthService:
         new_access_token = self.create_access_token(user)
         return new_access_token
 
-    async def compare_refresh_token_with_database_version(self, refresh_token: str, user_id: int):
+    async def compare_refresh_token_with_database_version(self, refresh_token: str, user_id: int) -> bool:
+        """
+        Сравнивает переданный ``refresh_token`` с refresh_token'ом из базы данных. В базе данных refresh_token
+        ищется по переданному ``user_id``.
+
+        :param refresh_token: **str**
+        :param user_id: **int**
+        :return: True, если токены совпадают; в обратном случае инициируется вызов исключения.
+        """
         refresh_token_model_from_db = await self.tokens_repository.get_token_by_user_id(user_id=user_id)
         if refresh_token_model_from_db.refresh_token == refresh_token:
             return True
