@@ -16,9 +16,6 @@ def encode_jwt(
         algorithm: str = settings.auth_jwt.algorithm,
         expire_minutes: int = settings.auth_jwt.access_token_expire_minutes,
         expire_timedelta: timedelta | None = None
-):
-    payload_to_encode = payload.copy()
-    now = datetime.datetime.utcnow()
 ) -> str:
     """
     Создает **JSON Web Token**, в который закодированы переданные функции параметры.
