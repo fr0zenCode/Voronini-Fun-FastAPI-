@@ -15,11 +15,11 @@ from services.users.errors import IncorrectCredentialsError
 from logger import logger
 
 
-@dataclass
 class UsersService:
 
-    users_repository = sqlalchemy_users_repository_factory()
-    tokens_repository = sqlalchemy_tokens_repository_factory()
+    def __init__(self):
+        self.users_repository = sqlalchemy_users_repository_factory()
+        self.tokens_repository = sqlalchemy_tokens_repository_factory()
 
     auth_service = auth_service_factory()
 
