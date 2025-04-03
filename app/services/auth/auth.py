@@ -28,9 +28,9 @@ class AuthService:
     tokens_repository = sqlalchemy_tokens_repository_factory()
     users_repository = sqlalchemy_users_repository_factory()
 
-    def validate_password(self, regular_password: str, hashed_password: str) -> bool:
+    def validate_password(self, non_hashed_password: str, hashed_password: str) -> bool:
         return bcrypt.checkpw(
-            password=regular_password.encode(self.ENCODING_TYPE),
+            password=non_hashed_password.encode(self.ENCODING_TYPE),
             hashed_password=hashed_password.encode(self.ENCODING_TYPE)
         )
 
