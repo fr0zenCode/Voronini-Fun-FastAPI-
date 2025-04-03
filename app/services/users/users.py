@@ -23,17 +23,16 @@ class UsersService:
 
     auth_service = auth_service_factory()
 
-    async def registrate_user(self, new_user: UserAddSchema):
         try:
             non_hashed_password = new_user.password
-            new_user.password = self.auth_service.hash_password(non_hashed_password)
+            new_user.password = auth_service.hash_password(non_hashed_password)
             new_user_id = await self.users_repository.add_user(user=new_user)
             return new_user_id
         except (OSError, InterfaceError):
-            print("services/users/users.py/registrate_user --- Нет соединения с БД.")
+            logger.error("Нет соединения с БД.")
             raise DatabaseLoseConnection()
         except ProgrammingError:
-            print("services/users/users.py/registrate_user --- Нарушение консистентности..")
+            logger.error("Нарушение консистенции.")
             raise DatabaseTablesErrors()
         except IntegrityError:
 
@@ -72,7 +71,10 @@ class UsersService:
         response.set_cookie(key="access-token", value=access_token)
         response.set_cookie(key="refresh-token", value=refresh_token)
 
-        await self.tokens_repository.add_token(token=TokenSchema(refresh_token=refresh_token, user_id=user.id))
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        }
 
     async def logout(self, response: Response, request: Request):
         await self.auth_service.is_user_authorized(request=request, response=response)
