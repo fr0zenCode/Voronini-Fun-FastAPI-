@@ -16,8 +16,8 @@ from ..users.errors import UserNotAuthorizedError
 @dataclass
 class AuthService:
 
-    ACCESS_TOKEN_COOKIES_ALIAS = "access-token"
-    REFRESH_TOKEN_COOKIES_ALIAS = "refresh-token"
+    ACCESS_TOKEN_COOKIES_ALIAS = "jwt"
+    REFRESH_TOKEN_COOKIES_ALIAS = "jwt_refresh_token"
 
     ACCESS_TOKEN_TYPE_POINTER = "access"
     REFRESH_TOKEN_TYPE_POINTER = "refresh"
