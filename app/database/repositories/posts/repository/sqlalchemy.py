@@ -4,8 +4,8 @@ from sqlalchemy import insert, delete, select
 
 from .abstract import AbstractPostsRepository
 from ..schemas import AddPostSchema, PostSchema
-from ...core.database import async_session_factory
-from ...core.models import Posts
+from database.core.database import async_session_factory
+from database.core.models import Posts
 
 
 @dataclass
@@ -33,28 +33,30 @@ class SQLAlchemyPostsRepository(AbstractPostsRepository):
             stmt = delete(Posts).where(Posts.id == post_id)
             await session.execute(stmt)
             await session.commit()
-            return {"message": f"post with id {post_id} successfully deleted!"}
+            return {
+                "message": "successful",
+                "detail": f"post with id {post_id} deleted"
+            }
 
     async def get_more_posts(self, offset: int, limit: int) -> list[PostSchema]:
         async with self._async_session_factory() as session:
             stmt = select(Posts).limit(limit).offset(offset)
-            print(f"limit {limit}, offset {offset}")
             result = await session.execute(stmt)
             rows = result.scalars().all()
-            return [row.to_pydantic_model() for row in rows]
+            return [row.convert_to_pydantic_model() for row in rows]
 
     async def get_all_posts(self) -> list[PostSchema]:
         async with self._async_session_factory() as session:
             stmt = select(Posts)
             result = await session.execute(stmt)
             posts = result.scalars().all()
-            return [post.to_pydantic_model() for post in posts]
+            return [post.convert_to_pydantic_model() for post in posts]
 
     async def get_post_by_id(self, post_id: int) -> PostSchema:
         async with self._async_session_factory() as session:
             stmt = select(Posts).where(Posts.id == post_id)
             result = await session.execute(stmt)
-            post = result.scalar_one().to_pydantic_model()
+            post = result.scalar_one().convert_to_pydantic_model()
             return post
 
 

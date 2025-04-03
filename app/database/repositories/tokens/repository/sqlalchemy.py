@@ -4,8 +4,8 @@ from sqlalchemy import insert, select, delete
 
 from database.core.database import async_session_factory
 from database.core.models import Tokens
-from database.tokens.repository.abstract import AbstractTokensRepository
-from database.tokens.schemas import TokenSchema
+from database.repositories.tokens.repository.abstract import AbstractTokensRepository
+from database.repositories.tokens.schemas import TokenSchema
 
 
 @dataclass
@@ -13,7 +13,7 @@ class SQLAlchemyTokensRepository(AbstractTokensRepository):
 
     _async_session_factory = async_session_factory
 
-    async def add_token(self, token: TokenSchema):
+    async def add_token(self, token: TokenSchema) -> dict:
         async with self._async_session_factory() as session:
             stmt = insert(Tokens).values(
                 user_id=token.user_id,
@@ -21,7 +21,10 @@ class SQLAlchemyTokensRepository(AbstractTokensRepository):
             )
             await session.execute(stmt)
             await session.commit()
-            return {"message": "token successfully added to database"}
+            return {
+                "message": "successful",
+                "detail": "token added to database"
+            }
 
     async def is_token_for_user_exists_by_user_id(self, user_id: int) -> bool:
         async with self._async_session_factory() as session:
@@ -42,7 +45,10 @@ class SQLAlchemyTokensRepository(AbstractTokensRepository):
             stmt = delete(Tokens).where(Tokens.user_id == user_id)
             await session.execute(stmt)
             await session.commit()
-            return {"message": f"token for user with id {user_id} successfully deleted!"}
+            return {
+                "message": "successful",
+                "detail": f"token for user with id {user_id} deleted"
+            }
 
 
 def sqlalchemy_tokens_repository_factory():
