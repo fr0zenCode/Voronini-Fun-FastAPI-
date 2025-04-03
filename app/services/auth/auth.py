@@ -104,16 +104,24 @@ class AuthService:
             "email": decoded_jwt["email"]
         }
 
-    async def get_user_id_from_jwt(self, request: Request):
+    async def get_user_id_from_jwt(self, request: Request) -> int:
         access_token = request.cookies.get(self.ACCESS_TOKEN_COOKIES_ALIAS)
         return decode_jwt(jwt_for_decode=access_token)["user_id"]
 
-    async def create_access_token_by_refresh_token(self, refresh_token: str):
+    async def create_access_token_by_refresh_token(self, refresh_token: str) -> str:
+        """
+        Создает новый access-token на основании действительного refresh-token'а.
+
+        :param refresh_token: **str**
+        :return: ``str`` access_token
+        """
         decoded_refresh_token = decode_jwt(refresh_token)
         user_id = decoded_refresh_token["user_id"]
+
         await self.compare_refresh_token_with_database_version(refresh_token=refresh_token, user_id=user_id)
-        user = await self.users_repository.get_user_by_id(user_id)
-        new_access_token = self.create_access_token(user)
+        user = await self.users_repository.get_user_by_id(user_id=user_id)
+
+        new_access_token = self.create_access_token(user=user)
         return new_access_token
 
     async def compare_refresh_token_with_database_version(self, refresh_token: str, user_id: int) -> bool:
@@ -131,7 +139,16 @@ class AuthService:
         logger.info("refresh-token из cookies не совпал с refresh-token'ом из базы данных")
         raise UserNotAuthorizedError()
 
-    async def is_user_authorized(self, access_token: str, refresh_token: str):
+    async def is_user_authorized(self, access_token: str, refresh_token: str) -> str | None:
+        """
+        **How to use:** \n
+        При получении от функции access-token'а действительного, либо нового, сгенерированного по refresh-token'у,
+        его следует тут же установить в cookies.
+        При получении в качестве ответа None, следует удалить из базы данных токенов refresh-token текущего
+        пользователя и отправить его на страницу аутентификации.
+
+        :param access_token: **str**
+        :param refresh_token: **str**
 
         :return: ``access_token`` в случае, если переданный access-token действителен или удалось сгенерировать новый по-действительному refresh-token'у. ``None`` в случае, когда оба токена просрочены и необходимо заново пройти процедуру аутентификации.
         """
