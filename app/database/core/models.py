@@ -38,26 +38,6 @@ class Users(Base):
         )
 
 
-class Posts(Base):
-
-    __tablename__ = "posts"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    author_username: Mapped[str]
-    text_content: Mapped[str]
-    created_at: Mapped[created_time]
-    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-
-    def convert_to_pydantic_model(self):
-        return PostSchema(
-            id=self.id,
-            author_id=self.author_id,
-            author_username=self.author_username,
-            text_content=self.text_content,
-            created_at=self.created_at
-        )
-
-
 class Tokens(Base):
 
     __tablename__ = "tokens"
