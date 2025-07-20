@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16.1-alpine
+    container_name: postgres_forum_database_container
+    environment:
+      POSTGRES_USER: test_forum_database
+      POSTGRES_PASSWORD: test_forum_database
+      POSTGRES_DB: test_forum_database
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7.4.5-alpine3.21
+    container_name: redis_forum_database_container
+    ports:
+      - "6379:6379"
