@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
-from fastapi.security import APIKeyCookie\
+from fastapi.security import APIKeyCookie
 
 SessionIDCookie = Annotated[
     str | None,
