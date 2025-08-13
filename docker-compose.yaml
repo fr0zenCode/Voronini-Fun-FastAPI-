@@ -4,12 +4,12 @@ services:
     build: .
     container_name: fastapi_forum_app_container
     environment:
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: postgres_forum_container
       POSTGRES_PORT: 5432
       POSTGRES_USER: test_forum_database
       POSTGRES_PASS: test_forum_database
       POSTGRES_NAME: test_forum_database
-      REDIS_HOST: redis
+      REDIS_HOST: redis_forum_container
       REDIS_PORT: 6379
     ports:
       - "8000:8000"
