@@ -3,8 +3,8 @@ from fastapi import APIRouter, Response
 
 from common.dependencies.authorization_dep import SessionID
 from redis_client.dependencies.redis_dep import GetRedisController
-from ..dependencies.auth_dep import GetAuthenticatedUserID
-from ..utils.users_utils import login_util, logout_util
+from users.dependencies.auth_dep import GetAuthenticatedUserID
+from users.utils.users_utils import login_util, logout_util
 
 auth_router = APIRouter(prefix="/users", tags=["auth"])
 
