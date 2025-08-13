@@ -1,84 +1,58 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Callable, Awaitable
 
 import uvicorn
 from fastapi import FastAPI
-from starlette.exceptions import HTTPException
+from requests import Response
+from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
-from api.posts import post_router
-from api.user import user_router
+from common.config import sessionmaker
+from common.sqlalchemy_ext import session_context
+from redis_client.redis_controller import RedisController
+from users.routes.auth_rest import auth_router
+from users.routes.sessions_test import sessions_test_router
+from users.routes.users_rest import user_router
+from posts.routes.posts_rest import post_router
 
-from database.errors import DatabaseLoseConnection, DatabaseTablesErrors, UserWithTheSameUsernameIsAlreadyExistsError, \
-    UserWithTheSameEmailIsAlreadyExistsError, DatabaseColumnsErrors
-from services.users.errors import IncorrectCredentialsError, UserNotAuthorizedError
 
 BASE_DIR = Path(__file__).parent
-static_folder = "static"
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(fastapi_app: FastAPI):
+    redis_controller = RedisController()
+    fastapi_app.state.redis_controller = redis_controller
+    yield
+    await redis_controller.close()
 
 
-@app.exception_handler(DatabaseLoseConnection)
-async def database_lose_connection_errors_handler(request: Request, exception: DatabaseLoseConnection):
-    raise HTTPException(
-        status_code=503,
-        detail=exception.message
-    )
+app = FastAPI(title="Форум для фанатов Ворониных", lifespan=lifespan)
 
-
-@app.exception_handler(DatabaseTablesErrors)
-async def database_tables_errors_handler(request: Request, exception: DatabaseTablesErrors):
-    raise HTTPException(
-        status_code=503,
-        detail=exception.message
-    )
-
-
-@app.exception_handler(UserWithTheSameUsernameIsAlreadyExistsError)
-async def user_with_the_same_username_is_already_exists_error_handler(
-        request: Request, exception: DatabaseTablesErrors
-):
-    raise HTTPException(
-        status_code=409,
-        detail=exception.message
-    )
-
-
-@app.exception_handler(UserWithTheSameEmailIsAlreadyExistsError)
-async def user_with_the_same_email_is_already_exists_error_handler(request: Request, exception: DatabaseTablesErrors):
-    raise HTTPException(
-        status_code=409,
-        detail=exception.message
-    )
-
-
-@app.exception_handler(DatabaseColumnsErrors)
-async def database_columns_errors_handler(request: Request, exception: DatabaseTablesErrors):
-    raise HTTPException(
-        status_code=409,
-        detail=exception.message
-    )
-
-
-@app.exception_handler(IncorrectCredentialsError)
-async def incorrect_user_credentials_for_login_error_handler(request: Request, exception: IncorrectCredentialsError):
-    raise HTTPException(
-        status_code=401,
-        detail=exception.message
-    )
-
-
-@app.exception_handler(UserNotAuthorizedError)
-async def user_not_authorized_error_handler(request: Request, exception: UserNotAuthorizedError):
-    raise HTTPException(
-        status_code=401,
-        detail=exception.message
-    )
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(user_router)
 app.include_router(post_router)
+app.include_router(auth_router)
+app.include_router(sessions_test_router)
+
+
+@app.middleware("http")
+async def database_session_middleware(
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+) -> Response:
+    async with sessionmaker.begin() as session:
+        session_context.set(session)
+        return await call_next(request)
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
